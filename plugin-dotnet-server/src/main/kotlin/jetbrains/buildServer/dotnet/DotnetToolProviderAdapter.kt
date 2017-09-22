@@ -20,8 +20,11 @@ class DotnetToolProviderAdapter(
     override fun getAvailableToolVersions(): MutableCollection<out ToolVersion> = tools.toMutableList()
 
     override fun tryGetPackageVersion(toolPackage: File): GetPackageVersionResult {
-        LOG.info("Get package version for file \"$toolPackage\"")
+        if (!NUGET_PACKAGE_FILE_FILTER.accept(toolPackage)) {
+            return super.tryGetPackageVersion(toolPackage)
+        }
 
+        LOG.info("Get package version for file \"$toolPackage\"")
         val versionResult = _packageVersionParser.tryParse(toolPackage.name)?.let {
             GetPackageVersionResult.version(DotnetToolVersion(it.toString()))
         } ?: GetPackageVersionResult.error("Failed to get version of " + toolPackage)
@@ -39,8 +42,7 @@ class DotnetToolProviderAdapter(
                 ?: throw ToolException("Failed to find package " + toolVersion)
 
         val downloadUrl = downloadableTool.downloadUrl
-        LOG.info("Start installing package \"${toolVersion.displayName}\"")
-        LOG.info("Downloading package from: \"$downloadUrl\"")
+        LOG.info("Start installing package \"${toolVersion.displayName}\" from: \"$downloadUrl\"")
         val targetFile = File(targetDirectory, downloadableTool.destinationFileName)
         try {
             _fileSystemService.write(targetFile) {
