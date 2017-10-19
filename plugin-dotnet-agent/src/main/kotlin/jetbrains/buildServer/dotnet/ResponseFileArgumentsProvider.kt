@@ -50,7 +50,7 @@ class ResponseFileArgumentsProvider(
                 }
             }
 
-            val tempDirectory = _pathsService.getPath(PathType.AgentTemp)
+            val tempDirectory = _pathsService.getPath(PathType.BuildTemp)
             val msBuildResponseFile = File(tempDirectory, _pathsService.uniqueName + ResponseFileExtension).absoluteFile
             _fileSystemService.write(msBuildResponseFile) {
                 OutputStreamWriter(it).use {
