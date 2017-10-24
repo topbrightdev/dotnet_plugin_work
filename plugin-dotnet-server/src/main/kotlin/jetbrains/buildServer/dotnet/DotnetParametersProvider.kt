@@ -20,19 +20,164 @@ class DotnetParametersProvider {
 
     val experimentalMode get() = DotnetParametersProvider.experimentalMode
 
-    // Command parameters
+    val commandKey: String
+        get() = DotnetConstants.PARAM_COMMAND
+
+    val pathsKey: String
+        get() = DotnetConstants.PARAM_PATHS
 
     val argumentsKey: String
         get() = DotnetConstants.PARAM_ARGUMENTS
 
-    val commandKey: String
-        get() = DotnetConstants.PARAM_COMMAND
+    val verbosityKey: String
+        get() = DotnetConstants.PARAM_VERBOSITY
 
-    val configKey: String
-        get() = DotnetConstants.PARAM_CONFIG
+    val restorePackagesKey: String
+        get() = DotnetConstants.PARAM_RESTORE_PACKAGES
 
-    val frameworkKey: String
-        get() = DotnetConstants.PARAM_FRAMEWORK
+    val restoreRuntimeKey: String
+        get() = DotnetConstants.PARAM_RESTORE_RUNTIME
+
+    val restoreParallelKey: String
+        get() = DotnetConstants.PARAM_RESTORE_PARALLEL
+
+    val restoreConfigKey: String
+        get() = DotnetConstants.PARAM_RESTORE_CONFIG
+
+    val restoreSourceKey: String
+        get() = DotnetConstants.PARAM_RESTORE_SOURCE
+
+    val restoreNoCacheKey: String
+        get() = DotnetConstants.PARAM_RESTORE_NO_CACHE
+
+    val restoreIgnoreFailedKey: String
+        get() = DotnetConstants.PARAM_RESTORE_IGNORE_FAILED
+
+    val restoreRootProjectKey: String
+        get() = DotnetConstants.PARAM_RESTORE_ROOT_PROJECT
+
+    val buildFrameworkKey: String
+        get() = DotnetConstants.PARAM_BUILD_FRAMEWORK
+
+    val buildConfigKey: String
+        get() = DotnetConstants.PARAM_BUILD_CONFIG
+
+    val buildRuntimeKey: String
+        get() = DotnetConstants.PARAM_BUILD_RUNTIME
+
+    val buildNonIncrementalKey: String
+        get() = DotnetConstants.PARAM_BUILD_NON_INCREMENTAL
+
+    val buildNoDependenciesKey: String
+        get() = DotnetConstants.PARAM_BUILD_NO_DEPENDENCIES
+
+    val buildOutputKey: String
+        get() = DotnetConstants.PARAM_BUILD_OUTPUT
+
+    val buildVersionSuffixKey: String
+        get() = DotnetConstants.PARAM_BUILD_VERSION_SUFFIX
+
+    val publishFrameworkKey: String
+        get() = DotnetConstants.PARAM_PUBLISH_FRAMEWORK
+
+    val publishConfigKey: String
+        get() = DotnetConstants.PARAM_PUBLISH_CONFIG
+
+    val publishOutputKey: String
+        get() = DotnetConstants.PARAM_PUBLISH_OUTPUT
+
+    val publishRuntimeKey: String
+        get() = DotnetConstants.PARAM_PUBLISH_RUNTIME
+
+    val publishVersionSuffixKey: String
+        get() = DotnetConstants.PARAM_PUBLISH_VERSION_SUFFIX
+
+    val packConfigKey: String
+        get() = DotnetConstants.PARAM_PACK_CONFIG
+
+    val packRuntimeKey: String
+        get() = DotnetConstants.PARAM_PACK_RUNTIME
+
+    val packOutputKey: String
+        get() = DotnetConstants.PARAM_PACK_OUTPUT
+
+    val packVersionSuffixKey: String
+        get() = DotnetConstants.PARAM_PACK_VERSION_SUFFIX
+
+    val packNoBuildKey: String
+        get() = DotnetConstants.PARAM_PACK_NO_BUILD
+
+    val packServiceableKey: String
+        get() = DotnetConstants.PARAM_PACK_SERVICEABLE
+
+    val testTestCaseFilterKey: String
+        get() = DotnetConstants.PARAM_TEST_TEST_CASE_FILTER
+
+    val testFrameworkKey: String
+        get() = DotnetConstants.PARAM_TEST_FRAMEWORK
+
+    val testConfigKey: String
+        get() = DotnetConstants.PARAM_TEST_CONFIG
+
+    val testOutputKey: String
+        get() = DotnetConstants.PARAM_TEST_OUTPUT
+
+    val testNoBuildKey: String
+        get() = DotnetConstants.PARAM_TEST_NO_BUILD
+
+    val testSettingsFileKey: String
+        get() = DotnetConstants.PARAM_TEST_SETTINGS_FILE
+
+    val runFrameworkKey: String
+        get() = DotnetConstants.PARAM_RUN_FRAMEWORK
+
+    val runRuntimeKey: String
+        get() = DotnetConstants.PARAM_RUN_RUNTIME
+
+    val runConfigKey: String
+        get() = DotnetConstants.PARAM_RUN_CONFIG
+
+    val nugetPushApiKey: String
+        get() = DotnetConstants.PARAM_NUGET_PUSH_API_KEY
+
+    val nugetPushSourceKey: String
+        get() = DotnetConstants.PARAM_NUGET_PUSH_SOURCE
+
+    val nugetPushNoBufferKey: String
+        get() = DotnetConstants.PARAM_NUGET_PUSH_NO_BUFFER
+
+    val nugetPushNoSymbolsKey: String
+        get() = DotnetConstants.PARAM_NUGET_PUSH_NO_SYMBOLS
+
+    val nugetDeleteIdKey: String
+        get() = DotnetConstants.PARAM_NUGET_DELETE_ID
+
+    val nugetDeleteApiKey: String
+        get() = DotnetConstants.PARAM_NUGET_DELETE_API_KEY
+
+    val nugetDeleteSourceKey: String
+        get() = DotnetConstants.PARAM_NUGET_DELETE_SOURCE
+
+    val cleanFrameworkKey: String
+        get() = DotnetConstants.PARAM_CLEAN_FRAMEWORK
+
+    val cleanConfigKey: String
+        get() = DotnetConstants.PARAM_CLEAN_CONFIG
+
+    val cleanRuntimeKey: String
+        get() = DotnetConstants.PARAM_CLEAN_RUNTIME
+
+    val cleanOutputKey: String
+        get() = DotnetConstants.PARAM_CLEAN_OUTPUT
+
+    val verbosity: List<Verbosity>
+        get() = Verbosity.values().toList()
+
+    val integrationPackagePathKey: String
+        get() = DotnetConstants.INTEGRATION_PACKAGE_HOME
+
+    val integrationPackageToolTypeKey: String
+        get() = DotnetConstants.PACKAGE_TYPE
 
     val msbuildVersionKey: String
         get() = DotnetConstants.PARAM_MSBUILD_VERSION
@@ -40,56 +185,44 @@ class DotnetParametersProvider {
     val msbuildVersions: List<Tool>
         get() = Tool.values().filter { it.type == ToolType.MSBuild }
 
-    val nugetApiKey: String
-        get() = DotnetConstants.PARAM_NUGET_API_KEY
+    val msbuildTargetsKey: String
+        get() = DotnetConstants.PARAM_MSBUILD_TARGETS
 
-    val nugetPackageIdKey: String
-        get() = DotnetConstants.PARAM_NUGET_PACKAGE_ID
+    val msbuildConfigKey: String
+        get() = DotnetConstants.PARAM_MSBUILD_CONFIG
 
-    val nugetPackageSourceKey: String
-        get() = DotnetConstants.PARAM_NUGET_PACKAGE_SOURCE
+    val msbuildPlatformKey: String
+        get() = DotnetConstants.PARAM_MSBUILD_PLATFORM
 
-    val nugetPackageSourcesKey: String
-        get() = DotnetConstants.PARAM_NUGET_PACKAGE_SOURCES
+    val msbuildRuntimeKey: String
+        get() = DotnetConstants.PARAM_MSBUILD_RUNTIME
 
-    val nugetPackagesDirKey: String
-        get() = DotnetConstants.PARAM_NUGET_PACKAGES_DIR
+    val vstestVersionKey: String
+        get() = DotnetConstants.PARAM_VSTEST_VERSION
 
-    val nugetConfigFileKey: String
-        get() = DotnetConstants.PARAM_NUGET_CONFIG_FILE
+    val vstestVersions: List<Tool>
+        get() = Tool.values().filter { it.type == ToolType.VSTest }
 
-    val nugetNoSymbolsKey: String
-        get() = DotnetConstants.PARAM_NUGET_NO_SYMBOLS
+    val vstestSettingsFileKey: String
+        get() = DotnetConstants.PARAM_VSTEST_SETTINGS_FILE
 
-    val skipBuildKey: String
-        get() = DotnetConstants.PARAM_SKIP_BUILD
+    val vstestPlatformKey: String
+        get() = DotnetConstants.PARAM_VSTEST_PLATFORM
 
-    val outputDirKey: String
-        get() = DotnetConstants.PARAM_OUTPUT_DIR
+    val vstestFrameworkKey: String
+        get() = DotnetConstants.PARAM_VSTEST_FRAMEWORK
 
-    val pathsKey: String
-        get() = DotnetConstants.PARAM_PATHS
+    val vstestFilterTypeKey: String
+        get() = DotnetConstants.PARAM_VSTEST_FILTER_TYPE
 
-    val platformKey: String
-        get() = DotnetConstants.PARAM_PLATFORM
+    val vstestTestNamesKey: String
+        get() = DotnetConstants.PARAM_VSTEST_TEST_NAMES
 
-    val runtimeKey: String
-        get() = DotnetConstants.PARAM_RUNTIME
+    val vstestTestCaseFilterKey: String
+        get() = DotnetConstants.PARAM_VSTEST_TEST_CASE_FILTER
 
-    val targetsKey: String
-        get() = DotnetConstants.PARAM_TARGETS
-
-    val testFilterKey: String
-        get() = DotnetConstants.PARAM_TEST_FILTER
-
-    val testNamesKey: String
-        get() = DotnetConstants.PARAM_TEST_NAMES
-
-    val testCaseFilterKey: String
-        get() = DotnetConstants.PARAM_TEST_CASE_FILTER
-
-    val testSettingsFileKey: String
-        get() = DotnetConstants.PARAM_TEST_SETTINGS_FILE
+    val vstestInIsolationKey: String
+        get() = DotnetConstants.PARAM_VSTEST_IN_ISOLATION
 
     val visualStudioActionKey: String
         get() = DotnetConstants.PARAM_VISUAL_STUDIO_ACTION
@@ -103,31 +236,11 @@ class DotnetParametersProvider {
     val visualStudioVersions: List<Tool>
         get() = Tool.values().filter { it.type == ToolType.VisualStudio }
 
-    val verbosityKey: String
-        get() = DotnetConstants.PARAM_VERBOSITY
+    val visualStudioConfigKey: String
+        get() = DotnetConstants.PARAM_VISUAL_STUDIO_CONFIG
 
-    val verbosityValues: List<Verbosity>
-        get() = Verbosity.values().toList()
-
-    val versionSuffixKey: String
-        get() = DotnetConstants.PARAM_VERSION_SUFFIX
-
-    val vstestVersionKey: String
-        get() = DotnetConstants.PARAM_VSTEST_VERSION
-
-    val vstestVersions: List<Tool>
-        get() = Tool.values().filter { it.type == ToolType.VSTest }
-
-
-    // Integration package
-
-    val integrationPackagePathKey: String
-        get() = DotnetConstants.INTEGRATION_PACKAGE_HOME
-
-    val integrationPackageToolTypeKey: String
-        get() = DotnetConstants.PACKAGE_TYPE
-
-    // Coverage keys
+    val visualStudioPlatformKey: String
+        get() = DotnetConstants.PARAM_VISUAL_STUDIO_PLATFORM
 
     val coverageTypeKey: String
         get() = CoverageConstants.PARAM_TYPE

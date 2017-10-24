@@ -3,20 +3,20 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="params" class="jetbrains.buildServer.dotnet.DotnetParametersProvider"/>
 
-<c:if test="${not empty propertiesBean.properties[params.targetsKey]}">
+<c:if test="${not empty propertiesBean.properties[params.visualStudioActionKey]}">
     <div class="parameter">
-        Targets: <props:displayValue name="${params.targetsKey}"/>
+        Targets: <props:displayValue name="${params.visualStudioActionKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.configKey]}">
+<c:if test="${not empty propertiesBean.properties[params.visualStudioConfigKey]}">
     <div class="parameter">
-        Configuration: <props:displayValue name="${params.configKey}"/>
+        Configuration: <props:displayValue name="${params.visualStudioConfigKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.platformKey]}">
+<c:if test="${not empty propertiesBean.properties[params.visualStudioPlatformKey]}">
     <div class="parameter">
-        Platform: <props:displayValue name="${params.platformKey}"/>
+        Platform: <props:displayValue name="${params.visualStudioPlatformKey}"/>
     </div>
 </c:if>

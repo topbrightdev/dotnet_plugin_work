@@ -3,32 +3,32 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="params" class="jetbrains.buildServer.dotnet.DotnetParametersProvider"/>
 
-<c:if test="${not empty propertiesBean.properties[params.frameworkKey]}">
+<c:if test="${not empty propertiesBean.properties[params.publishFrameworkKey]}">
     <div class="parameter">
-        Framework: <props:displayValue name="${params.frameworkKey}"/>
+        Framework: <props:displayValue name="${params.publishFrameworkKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.configKey]}">
+<c:if test="${not empty propertiesBean.properties[params.publishConfigKey]}">
     <div class="parameter">
-        Configuration: <props:displayValue name="${params.configKey}"/>
+        Configuration: <props:displayValue name="${params.publishConfigKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.runtimeKey]}">
+<c:if test="${not empty propertiesBean.properties[params.publishRuntimeKey]}">
     <div class="parameter">
-        Runtime: <props:displayValue name="${params.runtimeKey}"/>
+        Runtime: <props:displayValue name="${params.publishRuntimeKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.versionSuffixKey]}">
+<c:if test="${not empty propertiesBean.properties[params.publishOutputKey]}">
     <div class="parameter">
-        Version suffix: <props:displayValue name="${params.versionSuffixKey}"/>
+        Output directory: <props:displayValue name="${params.publishOutputKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.outputDirKey]}">
+<c:if test="${not empty propertiesBean.properties[params.publishVersionSuffixKey]}">
     <div class="parameter">
-        Output directory: <props:displayValue name="${params.outputDirKey}"/>
+        Version suffix: <props:displayValue name="${params.publishVersionSuffixKey}"/>
     </div>
 </c:if>

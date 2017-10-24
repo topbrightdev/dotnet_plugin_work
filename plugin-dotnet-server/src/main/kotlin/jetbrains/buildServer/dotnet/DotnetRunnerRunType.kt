@@ -74,7 +74,7 @@ class DotnetRunnerRunType(
 
     override fun describeParameters(parameters: Map<String, String>): String {
         val paths = parameters[DotnetConstants.PARAM_PATHS] ?: ""
-        return "${parameters[DotnetConstants.PARAM_COMMAND]?.replace('-', ' ')} $paths"
+        return "${parameters[DotnetConstants.PARAM_COMMAND]} $paths"
     }
 
     override fun getRunnerSpecificRequirements(runParameters: Map<String, String>): List<Requirement> {

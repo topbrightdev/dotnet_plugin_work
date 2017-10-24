@@ -4,20 +4,14 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="params" class="jetbrains.buildServer.dotnet.DotnetParametersProvider"/>
 
-<c:if test="${not empty propertiesBean.properties[params.frameworkKey]}">
+<c:if test="${not empty propertiesBean.properties[params.runFrameworkKey]}">
     <div class="parameter">
-        Framework: <props:displayValue name="${params.frameworkKey}"/>
+        Framework: <props:displayValue name="${params.runFrameworkKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.configKey]}">
+<c:if test="${not empty propertiesBean.properties[params.runConfigKey]}">
     <div class="parameter">
-        Configuration: <props:displayValue name="${params.configKey}"/>
-    </div>
-</c:if>
-
-<c:if test="${not empty propertiesBean.properties[params.runtimeKey]}">
-    <div class="parameter">
-        Runtime: <props:displayValue name="${params.runtimeKey}"/>
+        Configuration: <props:displayValue name="${params.runConfigKey}"/>
     </div>
 </c:if>
