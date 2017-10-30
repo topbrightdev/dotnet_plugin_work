@@ -3,26 +3,32 @@
 <jsp:useBean id="propertiesBean" scope="request" type="jetbrains.buildServer.controllers.BasePropertiesBean"/>
 <jsp:useBean id="params" class="jetbrains.buildServer.dotnet.DotnetParametersProvider"/>
 
-<c:if test="${not empty propertiesBean.properties[params.configKey]}">
+<c:if test="${not empty propertiesBean.properties[params.packConfigKey]}">
     <div class="parameter">
-        Configuration: <props:displayValue name="${params.configKey}"/>
+        Configuration: <props:displayValue name="${params.packConfigKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.versionSuffixKey]}">
+<c:if test="${not empty propertiesBean.properties[params.packOutputKey]}">
     <div class="parameter">
-        Version suffix: <props:displayValue name="${params.versionSuffixKey}"/>
+        Output directory: <props:displayValue name="${params.packOutputKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.outputDirKey]}">
+<c:if test="${not empty propertiesBean.properties[params.packVersionSuffixKey]}">
     <div class="parameter">
-        Output directory: <props:displayValue name="${params.outputDirKey}"/>
+        Version suffix: <props:displayValue name="${params.packVersionSuffixKey}"/>
     </div>
 </c:if>
 
-<c:if test="${not empty propertiesBean.properties[params.skipBuildKey]}">
+<c:if test="${not empty propertiesBean.properties[params.packNoBuildKey]}">
     <div class="parameter">
         Do not build the project before packing: <strong>ON</strong>
+    </div>
+</c:if>
+
+<c:if test="${not empty propertiesBean.properties[params.packServiceableKey]}">
+    <div class="parameter">
+        Set the serviceable flag in the package: <strong>ON</strong>
     </div>
 </c:if>
