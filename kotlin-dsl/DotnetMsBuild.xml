@@ -6,7 +6,7 @@
   ~  See LICENSE in the project root for license information.
   -->
 
-<dsl-extension kind="buildStep" type="dotnet.cli" generateDslJar="true" applicable="params['command'] == 'msbuild'">
+<dsl-extension kind="buildStep" type="dotnet" generateDslJar="true" applicable="params['dotnet-command'] == 'msbuild'">
     <class name="DotnetMsBuildStep">
         <description>
             A [dotnet msbuild step](https://github.com/JetBrains/teamcity-dotnet-plugin) to run .NET CLI command
@@ -19,10 +19,10 @@
         </description>
     </function>
     <init>
-        <param name="command" value="msbuild"/>
+        <param name="dotnet-command" value="msbuild"/>
     </init>
     <params>
-        <param name="paths" dslName="projects">
+        <param name="dotnet-paths" dslName="projects">
             <description>Specify paths to projects and solutions. Wildcards are supported.</description>
         </param>
         <param name="teamcity.build.workingDir" dslName="workingDir">
@@ -33,19 +33,19 @@
                 directory](https://confluence.jetbrains.com/display/TCDL/Build+Checkout+Directory).
             </description>
         </param>
-        <param name="targets">
+        <param name="dotnet-msbuild-targets" dslName="targets">
             <description>Specify the list of build targets.</description>
         </param>
-        <param name="configuration">
+        <param name="dotnet-msbuild-config" dslName="configuration">
             <description>Target configuration to build for.</description>
         </param>
-        <param name="runtime">
+        <param name="dotnet-msbuild-runtime" dslName="runtime">
             <description>Target runtime to build for.</description>
         </param>
-        <param name="args">
+        <param name="dotnet-args" dslName="args">
             <description>Enter additional command line parameters for dotnet msbuild.</description>
         </param>
-        <param name="verbosity" dslName="logging" type="Verbosity">
+        <param name="dotnet-verbosity" dslName="logging" type="Verbosity">
             <description>
                 Specify logging verbosity
                 @see Verbosity
