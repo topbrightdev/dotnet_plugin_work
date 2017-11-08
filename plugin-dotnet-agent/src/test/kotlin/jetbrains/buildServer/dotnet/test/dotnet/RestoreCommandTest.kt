@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import jetbrains.buildServer.dotnet.test.agent.ArgumentsServiceStub
 import org.testng.Assert
@@ -16,14 +17,22 @@ class RestoreCommandTest {
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_PATHS, "path/")),
                         listOf("customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_NUGET_PACKAGES_DIR, "packages/")),
+                        Pair(DotnetConstants.PARAM_RESTORE_PACKAGES, "packages/"),
+                        Pair(DotnetConstants.PARAM_RESTORE_PARALLEL, "false")),
                         listOf("--packages", "packages/", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_NUGET_PACKAGE_SOURCES, "http://jb.com")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_RESTORE_PARALLEL, "true")),
+                        listOf("--disable-parallel", "customArg1")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_RESTORE_SOURCE, "http://jb.com")),
                         listOf("--source", "http://jb.com", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_NUGET_PACKAGE_SOURCES, "http://jb.com\nhttp://jb.ru")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_RESTORE_SOURCE, "http://jb.com\nhttp://jb.ru")),
                         listOf("--source", "http://jb.com", "--source", "http://jb.ru", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_NUGET_PACKAGE_SOURCES, "http://jb.com http://jb.ru")),
-                        listOf("--source", "http://jb.com", "--source", "http://jb.ru", "customArg1")))
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_RESTORE_SOURCE, "http://jb.com http://jb.ru")),
+                        listOf("--source", "http://jb.com", "--source", "http://jb.ru", "customArg1")),
+                arrayOf(mapOf(
+                        DotnetConstants.PARAM_RESTORE_NO_CACHE to " tRue",
+                        DotnetConstants.PARAM_RESTORE_IGNORE_FAILED to "True ",
+                        DotnetConstants.PARAM_RESTORE_ROOT_PROJECT to "true"),
+                        listOf("--no-cache", "--ignore-failed-sources", "--no-dependencies", "customArg1")))
     }
 
     @Test(dataProvider = "testRestoreArgumentsData")
@@ -88,7 +97,7 @@ class RestoreCommandTest {
         val command = createCommand()
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)

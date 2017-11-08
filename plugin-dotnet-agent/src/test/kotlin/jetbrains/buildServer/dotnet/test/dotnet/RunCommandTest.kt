@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -16,11 +17,11 @@ class RunCommandTest {
                         DotnetConstants.PARAM_PATHS to "path/"),
                         listOf("customArg1")),
                 arrayOf(mapOf(
-                        DotnetConstants.PARAM_FRAMEWORK to "dotcore",
-                        DotnetConstants.PARAM_CONFIG to "Release"),
+                        DotnetConstants.PARAM_RUN_FRAMEWORK to "dotcore",
+                        DotnetConstants.PARAM_RUN_CONFIG to "Release"),
                         listOf("--framework", "dotcore", "--configuration", "Release", "customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_RUNTIME, "win")),
+                        Pair(DotnetConstants.PARAM_RUN_RUNTIME, "win")),
                         listOf("--runtime", "win", "customArg1")))
     }
 
@@ -86,7 +87,7 @@ class RunCommandTest {
         val command = createCommand()
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)

@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -14,13 +15,13 @@ class PackCommandTest {
         return arrayOf(
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_PATHS, "path/")),
                         listOf("customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_CONFIG, "Release")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_PACK_CONFIG, "Release")),
                         listOf("--configuration", "Release", "customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_OUTPUT_DIR, "output/")),
+                        Pair(DotnetConstants.PARAM_PACK_OUTPUT, "output/")),
                         listOf("--output", "output/", "customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_RUNTIME, "win")),
+                        Pair(DotnetConstants.PARAM_PACK_RUNTIME, "win")),
                         listOf("--runtime", "win", "customArg1")))
     }
 
@@ -86,7 +87,7 @@ class PackCommandTest {
         val command = createCommand()
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)

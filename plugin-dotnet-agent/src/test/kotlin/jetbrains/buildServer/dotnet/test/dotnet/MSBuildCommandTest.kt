@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -15,11 +16,11 @@ class MSBuildCommandTest {
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_PATHS, "path/")),
                         listOf("customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_TARGETS, "restore;build"),
-                        Pair(DotnetConstants.PARAM_RUNTIME, "osx.10.11-x64"),
-                        Pair(DotnetConstants.PARAM_CONFIG, "Release")),
+                        Pair(DotnetConstants.PARAM_MSBUILD_TARGETS, "restore;build"),
+                        Pair(DotnetConstants.PARAM_MSBUILD_RUNTIME, "osx.10.11-x64"),
+                        Pair(DotnetConstants.PARAM_MSBUILD_CONFIG, "Release")),
                         listOf("/t:restore;build", "/p:Configuration=Release", "/p:RuntimeIdentifiers=osx.10.11-x64", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_TARGETS, "clean restore, build;pack")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_MSBUILD_TARGETS, "clean restore, build;pack")),
                         listOf("/t:clean;restore;build;pack", "customArg1")))
     }
 
@@ -72,20 +73,25 @@ class MSBuildCommandTest {
     @DataProvider
     fun checkSuccessData(): Array<Array<Any>> {
         return arrayOf(
-                arrayOf(0, true),
-                arrayOf(1, true),
-                arrayOf(99, true),
-                arrayOf(-1, false),
-                arrayOf(-99, false))
+                arrayOf(0, false, true),
+                arrayOf(0, true, true),
+                arrayOf(1, true, true),
+                arrayOf(1, false, false),
+                arrayOf(99, true, true),
+                arrayOf(99, false, false),
+                arrayOf(-1, true, false),
+                arrayOf(-1, false, false),
+                arrayOf(-99, true, false),
+                arrayOf(-99, false, false))
     }
 
     @Test(dataProvider = "checkSuccessData")
-    fun shouldImplementCheckSuccess(exitCode: Int, expectedResult: Boolean) {
+    fun shouldImplementCheckSuccess(exitCode: Int, hasFailedTest: Boolean, expectedResult: Boolean) {
         // Given
-        val command = createCommand()
+        val command = createCommand(emptyMap(), emptySequence(), emptySequence(), FailedTestDetectorStub(hasFailedTest))
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)
@@ -106,9 +112,11 @@ class MSBuildCommandTest {
     fun createCommand(
             parameters: Map<String, String> = emptyMap(),
             targets: Sequence<String> = emptySequence(),
-            arguments: Sequence<CommandLineArgument> = emptySequence()): DotnetCommand =
+            arguments: Sequence<CommandLineArgument> = emptySequence(),
+            failedTestDetector: FailedTestDetector = FailedTestDetectorStub(false)): DotnetCommand =
             MSBuildCommand(
                     ParametersServiceStub(parameters),
+                    failedTestDetector,
                     TargetServiceStub(targets.map { CommandTarget(File(it)) }.asSequence()),
                     DotnetCommonArgumentsProviderStub(arguments),
                     DotnetToolResolverStub(File("msbuild.exe"), true))

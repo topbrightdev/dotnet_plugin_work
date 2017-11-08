@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -15,15 +16,15 @@ class VSTestCommandTest {
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_PATHS, "path/")),
                         listOf("vstestlog", "customArg1")),
                 arrayOf(mapOf(
-                        DotnetConstants.PARAM_TEST_SETTINGS_FILE to "myconfig.txt",
-                        DotnetConstants.PARAM_TEST_FILTER to "filter",
-                        DotnetConstants.PARAM_PLATFORM to "x86",
-                        DotnetConstants.PARAM_FRAMEWORK to "net45",
-                        DotnetConstants.PARAM_TEST_CASE_FILTER to "myfilter"),
-                        listOf("/Settings:myconfig.txt", "/TestCaseFilter:myfilter", "/Platform:x86", "/Framework:net45", "vstestlog", "customArg1")),
+                        DotnetConstants.PARAM_VSTEST_SETTINGS_FILE to "myconfig.txt",
+                        DotnetConstants.PARAM_VSTEST_TEST_NAMES to "abc,zxy",
+                        DotnetConstants.PARAM_VSTEST_IN_ISOLATION to "TrUe",
+                        DotnetConstants.PARAM_VSTEST_PLATFORM to "x86",
+                        DotnetConstants.PARAM_VSTEST_FRAMEWORK to "net45",
+                        DotnetConstants.PARAM_VSTEST_TEST_CASE_FILTER to "myfilter"),
+                        listOf("/Settings:myconfig.txt", "/Tests:abc,zxy", "/InIsolation", "/Platform:x86", "/Framework:net45", "/TestCaseFilter:myfilter", "vstestlog", "customArg1")),
                 arrayOf(mapOf(DotnetConstants.PARAM_PATHS to "my.dll",
-                        DotnetConstants.PARAM_TEST_FILTER to "name",
-                        DotnetConstants.PARAM_TEST_NAMES to "test1 test2; test3"),
+                        DotnetConstants.PARAM_VSTEST_TEST_NAMES to "test1 test2; test3"),
                         listOf("/Tests:test1,test2,test3", "vstestlog", "customArg1")))
     }
 
@@ -76,20 +77,25 @@ class VSTestCommandTest {
     @DataProvider
     fun checkSuccessData(): Array<Array<Any>> {
         return arrayOf(
-                arrayOf(0, true),
-                arrayOf(1, true),
-                arrayOf(99, true),
-                arrayOf(-1, false),
-                arrayOf(-99, false))
+                arrayOf(0, false, true),
+                arrayOf(0, true, true),
+                arrayOf(1, true, true),
+                arrayOf(1, false, false),
+                arrayOf(99, true, true),
+                arrayOf(99, false, false),
+                arrayOf(-1, true, false),
+                arrayOf(-1, false, false),
+                arrayOf(-99, true, false),
+                arrayOf(-99, false, false))
     }
 
     @Test(dataProvider = "checkSuccessData")
-    fun shouldImplementCheckSuccess(exitCode: Int, expectedResult: Boolean) {
+    fun shouldImplementCheckSuccess(exitCode: Int, hasFailedTest: Boolean, expectedResult: Boolean) {
         // Given
-        val command = createCommand()
+        val command = createCommand(emptyMap(), emptySequence(), emptySequence(), FailedTestDetectorStub(hasFailedTest))
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)
@@ -110,9 +116,11 @@ class VSTestCommandTest {
     fun createCommand(
             parameters: Map<String, String> = emptyMap(),
             targets: Sequence<String> = emptySequence(),
-            arguments: Sequence<CommandLineArgument> = emptySequence()): DotnetCommand =
+            arguments: Sequence<CommandLineArgument> = emptySequence(),
+            failedTestDetector: FailedTestDetector = FailedTestDetectorStub(false)): DotnetCommand =
             VSTestCommand(
                     ParametersServiceStub(parameters),
+                    failedTestDetector,
                     TargetServiceStub(targets.map { CommandTarget(File(it)) }.asSequence()),
                     DotnetCommonArgumentsProviderStub(sequenceOf(CommandLineArgument("vstestlog"))),
                     DotnetCommonArgumentsProviderStub(arguments),

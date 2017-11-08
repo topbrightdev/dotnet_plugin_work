@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -15,14 +16,14 @@ class TestCommandTest {
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_PATHS, "path/")),
                         listOf("customArg1")),
                 arrayOf(mapOf(
-                        Pair(DotnetConstants.PARAM_FRAMEWORK, "dotcore"),
-                        Pair(DotnetConstants.PARAM_CONFIG, "Release")),
+                        Pair(DotnetConstants.PARAM_TEST_FRAMEWORK, "dotcore"),
+                        Pair(DotnetConstants.PARAM_TEST_CONFIG, "Release")),
                         listOf("--framework", "dotcore", "--configuration", "Release", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_SKIP_BUILD, "true")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_TEST_NO_BUILD, "true")),
                         listOf("--no-build", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_OUTPUT_DIR, "out")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_TEST_OUTPUT, "out")),
                         listOf("--output", "out", "customArg1")),
-                arrayOf(mapOf(Pair(DotnetConstants.PARAM_TEST_CASE_FILTER, "filter")),
+                arrayOf(mapOf(Pair(DotnetConstants.PARAM_TEST_TEST_CASE_FILTER, "filter")),
                         listOf("--filter", "filter", "customArg1")))
     }
 
@@ -75,20 +76,25 @@ class TestCommandTest {
     @DataProvider
     fun checkSuccessData(): Array<Array<Any>> {
         return arrayOf(
-                arrayOf(0, true),
-                arrayOf(1, true),
-                arrayOf(99, true),
-                arrayOf(-1, false),
-                arrayOf(-99, false))
+                arrayOf(0, false, true),
+                arrayOf(0, true, true),
+                arrayOf(1, true, true),
+                arrayOf(1, false, false),
+                arrayOf(99, true, true),
+                arrayOf(99, false, false),
+                arrayOf(-1, true, false),
+                arrayOf(-1, false, false),
+                arrayOf(-99, true, false),
+                arrayOf(-99, false, false))
     }
 
     @Test(dataProvider = "checkSuccessData")
-    fun shouldImplementCheckSuccess(exitCode: Int, expectedResult: Boolean) {
+    fun shouldImplementCheckSuccess(exitCode: Int, hasFailedTest: Boolean, expectedResult: Boolean) {
         // Given
-        val command = createCommand()
+        val command = createCommand(emptyMap(), emptySequence(), emptySequence(), FailedTestDetectorStub(hasFailedTest))
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)
@@ -97,9 +103,11 @@ class TestCommandTest {
     fun createCommand(
             parameters: Map<String, String> = emptyMap(),
             targets: Sequence<String> = emptySequence(),
-            arguments: Sequence<CommandLineArgument> = emptySequence()): DotnetCommand =
+            arguments: Sequence<CommandLineArgument> = emptySequence(),
+            failedTestDetector: FailedTestDetector = FailedTestDetectorStub(false)): DotnetCommand =
             TestCommand(
                     ParametersServiceStub(parameters),
+                    failedTestDetector,
                     TargetServiceStub(targets.map { CommandTarget(File(it)) }.asSequence()),
                     DotnetCommonArgumentsProviderStub(arguments),
                     DotnetToolResolverStub(File("dotnet"), true))

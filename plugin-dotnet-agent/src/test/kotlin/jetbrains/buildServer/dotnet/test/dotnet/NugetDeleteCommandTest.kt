@@ -2,6 +2,7 @@ package jetbrains.buildServer.dotnet.test.dotnet
 
 import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.agent.CommandLineArgument
+import jetbrains.buildServer.agent.CommandLineResult
 import jetbrains.buildServer.dotnet.test.agent.runner.ParametersServiceStub
 import org.testng.Assert
 import org.testng.annotations.DataProvider
@@ -13,9 +14,9 @@ class NugetDeleteCommandTest {
     fun testNugetDeleteArgumentsData(): Array<Array<Any>> {
         return arrayOf(
                 arrayOf(mapOf(
-                        DotnetConstants.PARAM_NUGET_PACKAGE_ID to "id version",
-                        DotnetConstants.PARAM_NUGET_API_KEY to "key",
-                        DotnetConstants.PARAM_NUGET_PACKAGE_SOURCE to "http://jb.com"),
+                        DotnetConstants.PARAM_NUGET_DELETE_ID to "id version",
+                        DotnetConstants.PARAM_NUGET_DELETE_API_KEY to "key",
+                        DotnetConstants.PARAM_NUGET_DELETE_SOURCE to "http://jb.com"),
                         listOf("id", "version", "--api-key", "key",
                                 "--source", "http://jb.com", "--non-interactive", "customArg1"))
         )
@@ -63,7 +64,7 @@ class NugetDeleteCommandTest {
         val command = createCommand()
 
         // When
-        val actualResult = command.isSuccessfulExitCode(exitCode)
+        val actualResult = command.isSuccessful(CommandLineResult(sequenceOf(exitCode), emptySequence(), emptySequence()))
 
         // Then
         Assert.assertEquals(actualResult, expectedResult)
