@@ -33,7 +33,7 @@ class DotnetPropertiesExtension(
         try {
             val command = CommandLine(
                     TargetType.Tool,
-                    File(_toolProvider.getPath(DotnetConstants.EXECUTABLE)),
+                    File(_toolProvider.getPath(DotnetConstants.RUNNER_TYPE)),
                     File("."),
                     listOf(CommandLineArgument("--version")),
                     emptyList())

@@ -31,28 +31,44 @@ class RestoreCommand(
 
     override val arguments: Sequence<CommandLineArgument>
         get() = buildSequence {
-            parameters(DotnetConstants.PARAM_NUGET_PACKAGES_DIR)?.trim()?.let {
+            parameters(DotnetConstants.PARAM_RESTORE_PACKAGES)?.trim()?.let {
                 if (it.isNotBlank()) {
                     yield(CommandLineArgument("--packages"))
                     yield(CommandLineArgument(it))
                 }
             }
 
-            parameters(DotnetConstants.PARAM_NUGET_PACKAGE_SOURCES)?.let {
+            parameters(DotnetConstants.PARAM_RESTORE_SOURCE)?.let {
                 _argumentsService.split(it).forEach {
                     yield(CommandLineArgument("--source"))
                     yield(CommandLineArgument(it))
                 }
             }
 
-            parameters(DotnetConstants.PARAM_RUNTIME)?.let {
+            parameters(DotnetConstants.PARAM_RESTORE_RUNTIME)?.let {
                 _argumentsService.split(it).forEach {
                     yield(CommandLineArgument("--runtime"))
                     yield(CommandLineArgument(it))
                 }
             }
 
-            parameters(DotnetConstants.PARAM_NUGET_CONFIG_FILE)?.trim()?.let {
+            if (parameters(DotnetConstants.PARAM_RESTORE_PARALLEL, "").trim().toBoolean()) {
+                yield(CommandLineArgument("--disable-parallel"))
+            }
+
+            if (parameters(DotnetConstants.PARAM_RESTORE_NO_CACHE, "").trim().toBoolean()) {
+                yield(CommandLineArgument("--no-cache"))
+            }
+
+            if (parameters(DotnetConstants.PARAM_RESTORE_IGNORE_FAILED, "").trim().toBoolean()) {
+                yield(CommandLineArgument("--ignore-failed-sources"))
+            }
+
+            if (parameters(DotnetConstants.PARAM_RESTORE_ROOT_PROJECT, "").trim().toBoolean()) {
+                yield(CommandLineArgument("--no-dependencies"))
+            }
+
+            parameters(DotnetConstants.PARAM_RESTORE_CONFIG)?.trim()?.let {
                 if (it.isNotBlank()) {
                     yield(CommandLineArgument("--configfile"))
                     yield(CommandLineArgument(it))

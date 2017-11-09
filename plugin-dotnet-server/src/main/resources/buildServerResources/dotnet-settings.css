@@ -2,7 +2,3 @@
     display: inline-block;
     position: relative;
 }
-
-#paths-row textarea.expandable {
-    overflow: auto;
-}
