@@ -5,7 +5,7 @@
 <jsp:useBean id="params" class="jetbrains.buildServer.dotnet.DotnetParametersProvider"/>
 
 <div class="parameter">
-    Source: <strong><props:displayValue name="${params.nugetPackageSourceKey}"
+    Source: <strong><props:displayValue name="${params.nugetPushSourceKey}"
                                         emptyValue="Use default source"/></strong>
 </div>
 
@@ -13,8 +13,14 @@
     Packages: <props:displayValue name="${params.pathsKey}"/>
 </div>
 
-<c:if test="${propertiesBean.properties[params.nugetNoSymbolsKey]}">
+<c:if test="${propertiesBean.properties[params.nugetPushNoSymbolsKey]}">
     <div class="parameter">
         Do not publish an existing nuget symbols package: <strong>ON</strong>
+    </div>
+</c:if>
+
+<c:if test="${propertiesBean.properties[params.nugetPushNoBufferKey]}">
+    <div class="parameter">
+        Disable buffering when pushing to the server to decrease memory usage: <strong>ON</strong>
     </div>
 </c:if>
