@@ -66,13 +66,13 @@ class BuildServerShutdownMonitorTest {
         val buildFinishedSource = subjectOf<AgentLifeCycleEventSources.BuildFinishedEvent>()
         _ctx.checking(object : Expectations() {
             init {
-                oneOf<ParametersService>(_parametersService).tryGetParameter(ParameterType.Configuration, DotnetConstants.PARAM_BUILD_SERVER_SHUTDOWN)
+                allowing<ParametersService>(_parametersService).tryGetParameter(ParameterType.Configuration, DotnetConstants.PARAM_BUILD_SERVER_SHUTDOWN)
                 will(returnValue(buildServerShutdownParam))
 
                 oneOf<AgentLifeCycleEventSources>(_agentLifeCycleEventSources).buildFinishedSource
                 will(returnValue(buildFinishedSource))
 
-                oneOf<DotnetCommand>(command).commandType
+                allowing<DotnetCommand>(command).commandType
                 will(returnValue(dotnetCommandType))
 
                 allowing<DotnetToolResolver>(_dotnetToolResolver).executableFile
@@ -98,6 +98,28 @@ class BuildServerShutdownMonitorTest {
 
         // When
         monitor.register(context)
+        buildFinishedSource.onNext(AgentLifeCycleEventSources.BuildFinishedEvent(_agentRunningBuild, BuildFinishedStatus.FINISHED_SUCCESS))
+
+        // Then
+        _ctx.assertIsSatisfied()
+    }
+
+    @Test
+    fun shouldNotGetParameterOnBuildFinishedEvent() {
+        // Given
+        val buildFinishedSource = subjectOf<AgentLifeCycleEventSources.BuildFinishedEvent>()
+        _ctx.checking(object : Expectations() {
+            init {
+                never<ParametersService>(_parametersService).tryGetParameter(ParameterType.Configuration, DotnetConstants.PARAM_BUILD_SERVER_SHUTDOWN)
+
+                oneOf<AgentLifeCycleEventSources>(_agentLifeCycleEventSources).buildFinishedSource
+                will(returnValue(buildFinishedSource))
+            }
+        })
+
+        val monitor = createInstance()
+
+        // When
         buildFinishedSource.onNext(AgentLifeCycleEventSources.BuildFinishedEvent(_agentRunningBuild, BuildFinishedStatus.FINISHED_SUCCESS))
 
         // Then

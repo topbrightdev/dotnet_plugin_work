@@ -19,9 +19,8 @@ class BuildServerShutdownMonitor(
 
     init {
         _subscriptionToken = agentLifeCycleEventSources.buildFinishedSource.subscribe {
-            try {
-                val avoidShotdownBuildService = _parametersService.tryGetParameter(ParameterType.Configuration, DotnetConstants.PARAM_BUILD_SERVER_SHUTDOWN)?.equals("false", true) ?: false
-                if (!avoidShotdownBuildService && _contexts.size > 0) {
+            if (_contexts.size > 0) {
+                try {
                     LOG.debug("Has a build command")
                     val sdks = _contexts
                             .flatMap { it.sdks }
@@ -40,16 +39,19 @@ class BuildServerShutdownMonitor(
                                         emptyList())
                         )
                     }
+                } finally {
+                    _contexts.clear()
                 }
-            } finally {
-                _contexts.clear()
             }
         }
     }
 
     override fun register(context: DotnetBuildContext) {
         if (buildCommands.contains(context.command.commandType)) {
-            _contexts.add(context)
+            val avoidShutdownBuildService = _parametersService.tryGetParameter(ParameterType.Configuration, DotnetConstants.PARAM_BUILD_SERVER_SHUTDOWN)?.equals("false", true) ?: false
+            if (!avoidShutdownBuildService) {
+                _contexts.add(context)
+            }
         }
     }
 
