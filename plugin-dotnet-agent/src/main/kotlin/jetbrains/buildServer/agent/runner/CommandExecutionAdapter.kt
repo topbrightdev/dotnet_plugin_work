@@ -1,7 +1,6 @@
 package jetbrains.buildServer.agent.runner
 
 import jetbrains.buildServer.agent.*
-import jetbrains.buildServer.dotnet.DotnetWorkflowComposer
 import jetbrains.buildServer.rx.*
 import org.apache.log4j.Logger
 import java.io.File
@@ -29,12 +28,7 @@ class CommandExecutionAdapter(
         if (!_commandLine.title.isNullOrBlank())
         {
             if (_isHiddenInBuidLog) {
-                if (_virtualContext.isVirtual) {
-                    _loggerService.writeStandardOutput(_commandLine.title)
-                }
-                else {
-                    writeStandardOutput(_commandLine.title)
-                }
+                writeStandardOutput(_commandLine.title)
             }
             else {
                 _blockToken = _loggerService.writeBlock(_commandLine.title)
@@ -61,13 +55,19 @@ class CommandExecutionAdapter(
     override fun makeProgramCommandLine(): ProgramCommandLine = _programCommandLineFactory.create(_commandLine)
 
     override fun onStandardOutput(text: String) {
-        _eventObserver.onNext(CommandResultOutput(text))
-        writeStandardOutput(text)
+        val event = CommandResultOutput(text)
+        _eventObserver.onNext(event)
+        if (!event.attributes.contains(CommandResultAttribute.Suppressed)) {
+            writeStandardOutput(text)
+        }
     }
 
     override fun onErrorOutput(error: String) {
+        val event = CommandResultOutput(error)
         _eventObserver.onNext(CommandResultOutput(error))
-        _loggerService.writeWarning(error)
+        if (!event.attributes.contains(CommandResultAttribute.Suppressed)) {
+            _loggerService.writeWarning(error)
+        }
     }
 
     override fun interruptRequested(): TerminationAction = TerminationAction.KILL_PROCESS_TREE
@@ -83,7 +83,7 @@ class CommandExecutionAdapter(
             _loggerService.writeStandardOutput(text)
         }
         else {
-            _loggerService.writeTrace(text)
+            LOG.info(text)
         }
     }
 
@@ -92,7 +92,7 @@ class CommandExecutionAdapter(
             _loggerService.writeStandardOutput(*text)
         }
         else {
-            _loggerService.writeTrace(text.map { it.text }.joinToString(" "))
+            LOG.info(text.map { it.text }.joinToString(" "))
         }
     }
 
@@ -102,20 +102,18 @@ class CommandExecutionAdapter(
             private val _isHiddenInBuidLog: Boolean):
             BuildProgressLogger by _baseLogger {
 
-        override fun warning(message: String?) {
-            if (message != null) {
-                _loggerService.writeTrace(message)
-            }
-        }
-
         override fun message(message: String?) {
             if (!_isHiddenInBuidLog) {
                 _baseLogger.message(message)
             } else {
                 if (message != null) {
-                    _loggerService.writeTrace(message)
+                    LOG.info(message)
                 }
             }
         }
+    }
+
+    companion object {
+        private val LOG = Logger.getLogger(CommandExecutionAdapter::class.java)
     }
 }
