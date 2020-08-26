@@ -1,11 +1,13 @@
-package jetbrains.buildServer.dotnet.test.visualStudio
+package jetbrains.buildServer.dotnet.test.dotnet
 
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import jetbrains.buildServer.agent.*
-import jetbrains.buildServer.visualStudio.VisualStudioPackagesEnvironmentLocator
+import jetbrains.buildServer.dotnet.MSBuildValidator
+import jetbrains.buildServer.dotnet.VisualStudioPackagesEnvironmentLocator
+import jetbrains.buildServer.dotnet.VisualStudioPackagesRegistryLocator
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test

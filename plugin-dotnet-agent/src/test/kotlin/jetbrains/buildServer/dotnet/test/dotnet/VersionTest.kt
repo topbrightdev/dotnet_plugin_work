@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package jetbrains.buildServer.dotnet.test.agent
+package jetbrains.buildServer.dotnet.test.dotnet
 
-import jetbrains.buildServer.agent.Version
+import jetbrains.buildServer.dotnet.Version
 import org.testng.Assert
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
@@ -63,10 +63,7 @@ class VersionTest {
                 arrayOf(Version(0, 2), "0.2.0"),
                 arrayOf(Version(2, 0, 0), "2.0.0"),
                 arrayOf(Version(0, 0, 2), "0.0.2"),
-                arrayOf(Version.parse("0.1.2-beta+meta"), "0.1.2-beta+meta"),
-                arrayOf(Version.parse("03.001.02"), "03.001.02"),
-                arrayOf(Version.parse("v0.1.2-beta+meta"), "0.1.2-beta+meta"),
-                arrayOf(Version.parse("vv03.001.02"), "03.001.02"))
+                arrayOf(Version.parse("0.1.2-beta+meta"), "0.1.2-beta+meta"))
     }
 
     @Test(dataProvider = "testDataToString")
@@ -124,7 +121,6 @@ class VersionTest {
         return arrayOf(
                 arrayOf("", Version.Empty),
                 arrayOf("1", Version(1)),
-                arrayOf("10.0-A", Version(10, 0, 0, "A")),
                 arrayOf("1.23.99", Version(1, 23, 99)),
                 arrayOf("abc", Version.Empty),
                 arrayOf("abc.xyz", Version.Empty),
@@ -133,8 +129,7 @@ class VersionTest {
                 arrayOf(".xyz", Version.Empty),
                 arrayOf(".1", Version.Empty),
                 arrayOf("abc.1", Version.Empty),
-                arrayOf("1.abc", Version.Empty),
-                arrayOf(" Version:     1.0.0-beta-001598", Version.parse("1.0.0-beta-001598")))
+                arrayOf("1.abc", Version.Empty))
     }
 
     @Test(dataProvider = "testDataParse")

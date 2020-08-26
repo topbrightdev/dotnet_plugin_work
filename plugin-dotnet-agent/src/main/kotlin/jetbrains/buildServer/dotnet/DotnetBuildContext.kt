@@ -17,7 +17,6 @@
 package jetbrains.buildServer.dotnet
 
 import jetbrains.buildServer.agent.ToolPath
-import jetbrains.buildServer.agent.Version
 
 data class DotnetBuildContext(
         val workingDirectory: ToolPath,

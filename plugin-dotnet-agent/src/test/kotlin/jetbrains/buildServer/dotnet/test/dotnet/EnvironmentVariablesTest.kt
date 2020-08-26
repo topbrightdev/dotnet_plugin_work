@@ -25,7 +25,8 @@ import jetbrains.buildServer.agent.runner.PathType
 import jetbrains.buildServer.agent.runner.PathsService
 import jetbrains.buildServer.dotnet.EnvironmentVariables
 import jetbrains.buildServer.dotnet.EnvironmentVariablesImpl
-import jetbrains.buildServer.agent.Version
+import jetbrains.buildServer.dotnet.NugetCredentialProviderSelector
+import jetbrains.buildServer.dotnet.Version
 import jetbrains.buildServer.util.OSType
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod

@@ -18,7 +18,6 @@ package jetbrains.buildServer.dotnet
 
 import jetbrains.buildServer.agent.CommandLineArgument
 import jetbrains.buildServer.agent.CommandLineArgumentType
-import jetbrains.buildServer.agent.Version
 
 class SharedCompilationArgumentsProvider: ArgumentsProvider {
     override fun getArguments(context: DotnetBuildContext): Sequence<CommandLineArgument> = sequence {

@@ -45,4 +45,3 @@ fabric.properties
 build
 /classes/
 plugin-dotnet-server/tools/
-plugin-dotnet-agent/tools/

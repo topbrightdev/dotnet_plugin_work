@@ -1,31 +1,31 @@
-package jetbrains.buildServer.dotnet.test.visualStudio
+package jetbrains.buildServer.dotnet.test.dotnet
 
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import jetbrains.buildServer.agent.JsonParser
-import jetbrains.buildServer.agent.ToolInstanceType
-import jetbrains.buildServer.agent.Version
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser.CatalogInfo
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser.Companion.TeamExplorerProductId
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser.ProductInfo
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser.VisualStudioState
-import jetbrains.buildServer.agent.runner.ToolInstance
-import jetbrains.buildServer.dotnet.Platform
-import jetbrains.buildServer.visualStudio.VisualStudioInstanceParser
+import jetbrains.buildServer.dotnet.CommandResult
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser.CatalogInfo
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser.Companion.TeamExplorerProductId
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser.ProductInfo
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser.VisualStudioState
+import jetbrains.buildServer.dotnet.VisualStudioInstance
+import jetbrains.buildServer.dotnet.VisualStudioInstanceParser
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.FileInputStream
+import java.io.Serializable
+import java.util.*
 
 
 class VisualStudioInstanceParserTest {
     @MockK private lateinit var _jsonParser: JsonParser
-    private val _path = File(File(File("path"), "Common7"), "IDE")
 
     @BeforeMethod
     fun setUp() {
@@ -40,27 +40,13 @@ class VisualStudioInstanceParserTest {
                         VisualStudioState().let {
                             it.installationPath = "path"
                             it.catalogInfo = CatalogInfo()
-                            it.launchParams = JsonVisualStudioInstanceParser.LaunchParams()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
-                            it.catalogInfo!!.productLineVersion = "2019"
-                            it.product = ProductInfo()
-                            it.product!!.id = "abc"
-                            it.launchParams!!.fileName = File(File(File("Common7"), "IDE2"), "devenv.exe").path
-                            it
-                        },
-                        ToolInstance(ToolInstanceType.VisualStudio, File(File(File("path"), "Common7"), "IDE2"), Version(16, 6, 3), Version(2019), Platform.Default)
-                ),
-                arrayOf(
-                        VisualStudioState().let {
-                            it.installationPath = "path"
-                            it.catalogInfo = CatalogInfo()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productDisplayVersion = "display"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it.product!!.id = "abc"
                             it
                         },
-                        ToolInstance(ToolInstanceType.VisualStudio, _path, Version(16, 6, 3), Version(2019), Platform.Default)
+                        VisualStudioInstance("path", "display", "product")
                 ),
                 arrayOf(
                         VisualStudioState().let {
@@ -68,30 +54,30 @@ class VisualStudioInstanceParserTest {
                             it.catalogInfo = CatalogInfo()
                             it.installationVersion = "instalation"
                             it.catalogInfo!!.productDisplayVersion = null
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it.product!!.id = "abc"
                             it
                         },
-                        ToolInstance(ToolInstanceType.VisualStudio, _path, Version.Empty, Version(2019), Platform.Default)
+                        VisualStudioInstance("path", "instalation", "product")
                 ),
                 arrayOf(
                         VisualStudioState().let {
                             it.installationPath = "path"
                             it.catalogInfo = CatalogInfo()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productDisplayVersion = "display"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it
                         },
-                        ToolInstance(ToolInstanceType.VisualStudio, _path, Version(16, 6, 3), Version(2019), Platform.Default)
+                        VisualStudioInstance("path", "display", "product")
                 ),
                 arrayOf(
                         VisualStudioState().let {
                             it.installationPath = "path"
                             it.catalogInfo = CatalogInfo()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productDisplayVersion = "display"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it.product!!.id = TeamExplorerProductId
                             it
@@ -102,8 +88,8 @@ class VisualStudioInstanceParserTest {
                         VisualStudioState().let {
                             it.installationPath = null
                             it.catalogInfo = CatalogInfo()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productDisplayVersion = "display"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it.product!!.id = "abc"
                             it
@@ -115,7 +101,7 @@ class VisualStudioInstanceParserTest {
                             it.installationPath = "path"
                             it.catalogInfo = CatalogInfo()
                             it.catalogInfo!!.productDisplayVersion = null
-                            it.catalogInfo!!.productLineVersion = "2019"
+                            it.catalogInfo!!.productLineVersion = "product"
                             it.product = ProductInfo()
                             it.product!!.id = "abc"
                             it
@@ -126,7 +112,7 @@ class VisualStudioInstanceParserTest {
                         VisualStudioState().let {
                             it.installationPath = "path"
                             it.catalogInfo = CatalogInfo()
-                            it.catalogInfo!!.productDisplayVersion = "16.6.3"
+                            it.catalogInfo!!.productDisplayVersion = "display"
                             it.catalogInfo!!.productLineVersion = null
                             it.product = ProductInfo()
                             it.product!!.id = "abc"
@@ -151,7 +137,7 @@ class VisualStudioInstanceParserTest {
     }
 
     @Test(dataProvider = "getParseData")
-    fun shouldParse(visualStudioState: VisualStudioState, expectedInstance: ToolInstance?) {
+    fun shouldParse(visualStudioState: VisualStudioState, expectedInstance: VisualStudioInstance?) {
         // Given
         val parser = createInstance()
         every { _jsonParser.tryParse<VisualStudioState>(any(), VisualStudioState::class.java) } returns visualStudioState

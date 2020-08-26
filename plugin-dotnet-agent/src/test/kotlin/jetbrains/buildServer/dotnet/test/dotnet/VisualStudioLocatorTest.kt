@@ -1,18 +1,14 @@
-package jetbrains.buildServer.dotnet.test.visualStudio
+package jetbrains.buildServer.dotnet.test.dotnet
 
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import jetbrains.buildServer.agent.AgentProperty
 import jetbrains.buildServer.agent.FileSystemService
-import jetbrains.buildServer.agent.ToolInstanceType
-import jetbrains.buildServer.agent.Version
+import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.dotnet.test.agent.VirtualFileSystemService
-import jetbrains.buildServer.agent.runner.ToolInstance
-import jetbrains.buildServer.dotnet.Platform
-import jetbrains.buildServer.visualStudio.VisualStudioInstanceParser
-import jetbrains.buildServer.visualStudio.VisualStudioFileSystemProvider
-import jetbrains.buildServer.visualStudio.VisualStudioPackagesLocator
+import jetbrains.buildServer.util.PEReader.PEVersion
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
@@ -21,14 +17,14 @@ import java.io.File
 import java.io.InputStream
 import java.io.PipedInputStream
 
-class VisualStudioFileSystemProviderTest {
+class VisualStudioLocatorTest {
     @MockK private lateinit var _visualStudioPackagesLocator1: VisualStudioPackagesLocator
     @MockK private lateinit var _visualStudioPackagesLocator2: VisualStudioPackagesLocator
     @MockK private lateinit var _visualStudioInstancesParser: VisualStudioInstanceParser
     private val _inputStream1: InputStream = PipedInputStream()
     private val _inputStream2: InputStream = PipedInputStream()
-    private val _visualStudioInstance1: ToolInstance = ToolInstance(ToolInstanceType.VisualStudio, File("a1"), Version.Empty, Version.Empty, Platform.Default)
-    private val _visualStudioInstance2: ToolInstance = ToolInstance(ToolInstanceType.VisualStudio, File("a2"), Version.Empty, Version.Empty, Platform.Default)
+    private val _visualStudioInstance1: VisualStudioInstance = VisualStudioInstance("1", "", "")
+    private val _visualStudioInstance2: VisualStudioInstance = VisualStudioInstance("2", "", "")
 
     @BeforeMethod
     fun setUp() {
@@ -145,7 +141,7 @@ class VisualStudioFileSystemProviderTest {
                         "ProgramData/Microsoft/VisualStudio/Packages2",
                         _visualStudioInstance1,
                         _visualStudioInstance2,
-                        emptyList<ToolInstance>()
+                        emptyList<VisualStudioInstance>()
                 ),
                 arrayOf(
                         VirtualFileSystemService()
@@ -155,7 +151,7 @@ class VisualStudioFileSystemProviderTest {
                         null,
                         _visualStudioInstance1,
                         _visualStudioInstance2,
-                        emptyList<ToolInstance>()
+                        emptyList<VisualStudioInstance>()
                 ),
                 arrayOf(
                         VirtualFileSystemService(),
@@ -163,7 +159,7 @@ class VisualStudioFileSystemProviderTest {
                         null,
                         _visualStudioInstance1,
                         _visualStudioInstance2,
-                        emptyList<ToolInstance>()
+                        emptyList<VisualStudioInstance>()
                 ),
                 arrayOf(
                         VirtualFileSystemService()
@@ -183,9 +179,9 @@ class VisualStudioFileSystemProviderTest {
             fileSystemService: FileSystemService,
             packagesPath1: String?,
             packagesPath2: String?,
-            visualStudioInstance1: ToolInstance?,
-            visualStudioInstance2: ToolInstance?,
-            expectedInstances: List<ToolInstance>) {
+            visualStudioInstance1: VisualStudioInstance?,
+            visualStudioInstance2: VisualStudioInstance?,
+            expectedInstances: List<VisualStudioInstance>) {
         // Given
         val locator = createInstance(fileSystemService)
         every { _visualStudioPackagesLocator1.tryGetPackagesPath() } returns packagesPath1
@@ -194,12 +190,12 @@ class VisualStudioFileSystemProviderTest {
         every { _visualStudioInstancesParser.tryParse(_inputStream2) } returns visualStudioInstance2
 
         // When
-        val actualInstances = locator.getInstances().toList()
+        val actualInstances = locator.instances.toList()
 
         // Then
         Assert.assertEquals(actualInstances, expectedInstances)
     }
 
     private fun createInstance(fileSystemService: FileSystemService) =
-            VisualStudioFileSystemProvider(listOf(_visualStudioPackagesLocator1, _visualStudioPackagesLocator2), fileSystemService, _visualStudioInstancesParser)
+            VisualStudioLocatorImpl(listOf(_visualStudioPackagesLocator1, _visualStudioPackagesLocator2), fileSystemService, _visualStudioInstancesParser)
 }

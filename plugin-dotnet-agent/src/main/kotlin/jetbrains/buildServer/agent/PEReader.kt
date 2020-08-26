@@ -4,5 +4,5 @@ import jetbrains.buildServer.util.PEReader.PEVersion
 import java.io.File
 
 interface PEReader {
-    fun tryGetVersion(file: File): Version
+    fun tryGetProductVersion(file: File): PEVersion?
 }

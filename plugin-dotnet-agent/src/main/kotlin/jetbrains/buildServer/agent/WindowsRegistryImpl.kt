@@ -1,8 +1,6 @@
 package jetbrains.buildServer.agent
 
-import WindowsRegistryValueType
 import jetbrains.buildServer.util.OSType
-import java.io.File
 
 class WindowsRegistryImpl(
         private val _environment: Environment,
@@ -10,13 +8,13 @@ class WindowsRegistryImpl(
         private val _windowsRegistryParser: WindowsRegistryParser)
     : WindowsRegistry {
 
-    override fun get(key: WindowsRegistryKey, visitor: WindowsRegistryVisitor, recursively: Boolean) {
+    override fun get(key: WindowsRegistryKey, visitor: WindowsRegistryVisitor) {
         if (_environment.os != OSType.WINDOWS) {
             return
         }
 
         var curKey: WindowsRegistryKey = key;
-        for (line in getLines(key, recursively)) {
+        for (line in getLines(key)) {
             if (line.isBlank()) {
                 continue
             }
@@ -40,17 +38,12 @@ class WindowsRegistryImpl(
         }
     }
 
-    private fun getLines(key: WindowsRegistryKey, recursively: Boolean) =
+    private fun getLines(key: WindowsRegistryKey) =
             _commandLineExecutor.tryExecute(
                     createQueryCommand(
-                            sequence {
-                                yield(CommandLineArgument(key.regKey))
-                                yield(CommandLineArgument("/reg:${key.bitness.id}"))
-                                if(recursively) {
-                                    yield(CommandLineArgument("/s"))
-                                }
-                            }
-
+                            CommandLineArgument(key.regKey),
+                            CommandLineArgument("/reg:${key.bitness.id}"),
+                            CommandLineArgument("/s")
                     ))?.let { result ->
                 when (result.exitCode) {
                     0 -> {
@@ -60,7 +53,7 @@ class WindowsRegistryImpl(
                 }
             } ?: emptySequence<String>()
 
-    private fun createQueryCommand(args: Sequence<CommandLineArgument>) = CommandLine(
+    private fun createQueryCommand(vararg args: CommandLineArgument) = CommandLine(
                 null,
                 TargetType.SystemDiagnostics,
                 Path("REG"),

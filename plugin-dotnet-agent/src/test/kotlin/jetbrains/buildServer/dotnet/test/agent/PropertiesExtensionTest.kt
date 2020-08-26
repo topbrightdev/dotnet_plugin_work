@@ -19,11 +19,15 @@ package jetbrains.buildServer.dotnet.test.agent
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import jetbrains.buildServer.agent.*
-import jetbrains.buildServer.agent.ToolInstanceType
+import jetbrains.buildServer.agent.runner.PathType
+import jetbrains.buildServer.agent.runner.PathsService
+import jetbrains.buildServer.dotnet.*
 import jetbrains.buildServer.rx.subjectOf
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
+import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
+import java.io.File
 
 class PropertiesExtensionTest {
     @MockK private lateinit var _eventSources: EventSources
@@ -54,10 +58,10 @@ class PropertiesExtensionTest {
         every { _buildAgentConfiguration.configurationParameters } returns config
 
         every { _agentPropertiesProvider1.desription } returns "1"
-        every { _agentPropertiesProvider1.properties } returns sequenceOf(AgentProperty(ToolInstanceType.DotNetCLI, "prop1", "val1"), AgentProperty(ToolInstanceType.DotNetCLI, "prop", "val"))
+        every { _agentPropertiesProvider1.properties } returns sequenceOf(AgentProperty("prop1", "val1"), AgentProperty("prop", "val"))
 
         every { _agentPropertiesProvider2.desription } returns "2"
-        every { _agentPropertiesProvider2.properties } returns sequenceOf(AgentProperty(ToolInstanceType.DotNetCLI, "prop", "val"), AgentProperty(ToolInstanceType.DotNetCLI, "prop2", "val2"))
+        every { _agentPropertiesProvider2.properties } returns sequenceOf(AgentProperty("prop", "val"), AgentProperty("prop2", "val2"))
 
         createInstance()
 

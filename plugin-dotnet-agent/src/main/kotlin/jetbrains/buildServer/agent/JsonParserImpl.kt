@@ -1,5 +1,7 @@
 package jetbrains.buildServer.agent
 
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser
+import org.apache.log4j.Logger
 import java.io.Reader
 
 class JsonParserImpl : JsonParser {

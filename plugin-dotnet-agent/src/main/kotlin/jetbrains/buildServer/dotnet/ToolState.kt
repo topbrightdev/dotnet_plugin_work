@@ -18,7 +18,6 @@ package jetbrains.buildServer.dotnet
 
 import jetbrains.buildServer.agent.Path
 import jetbrains.buildServer.agent.ToolPath
-import jetbrains.buildServer.agent.Version
 import jetbrains.buildServer.rx.Observer
 
 class ToolState(

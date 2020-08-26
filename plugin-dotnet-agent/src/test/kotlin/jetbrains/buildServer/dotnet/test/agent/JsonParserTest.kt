@@ -1,7 +1,8 @@
 package jetbrains.buildServer.dotnet.test.agent
 
+import jetbrains.buildServer.agent.JsonParser
 import jetbrains.buildServer.agent.JsonParserImpl
-import jetbrains.buildServer.visualStudio.JsonVisualStudioInstanceParser
+import jetbrains.buildServer.dotnet.JsonVisualStudioInstanceParser
 import org.testng.Assert
 import org.testng.annotations.Test
 import java.io.*
