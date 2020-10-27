@@ -1,16 +1,22 @@
-package jetbrains.buildServer.dotnet
+package jetbrains.buildServer.visualStudio
 
 import jetbrains.buildServer.agent.JsonParser
+import jetbrains.buildServer.agent.ToolInstanceType
+import jetbrains.buildServer.agent.Version
+import jetbrains.buildServer.agent.runner.ToolInstance
+import jetbrains.buildServer.dotnet.Platform
 import org.apache.log4j.Logger
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStream
 import java.io.InputStreamReader
 
 class JsonVisualStudioInstanceParser(private val _jsonParser: JsonParser) : VisualStudioInstanceParser {
-    override fun tryParse(stream: InputStream): VisualStudioInstance? {
+    override fun tryParse(stream: InputStream): ToolInstance? {
         BufferedReader(InputStreamReader(stream)).use {
             val state = _jsonParser.tryParse<VisualStudioState>(it, VisualStudioState::class.java)
             val installationPath = state?.installationPath;
+            val fileName = state?.launchParams?.fileName ?: DefaultDevenvPath.path
             val displayVersion = state?.catalogInfo?.productDisplayVersion ?: state?.installationVersion
             val productLineVersion = state?.catalogInfo?.productLineVersion
             if (installationPath.isNullOrBlank() || displayVersion.isNullOrBlank() || productLineVersion.isNullOrBlank()) {
@@ -24,16 +30,19 @@ class JsonVisualStudioInstanceParser(private val _jsonParser: JsonParser) : Visu
                 return null
             }
 
-            return VisualStudioInstance(
-                    installationPath,
-                    displayVersion,
-                    productLineVersion)
+            return ToolInstance(
+                    ToolInstanceType.VisualStudio,
+                    File(File(installationPath), fileName).parentFile,
+                    Version.parse(displayVersion),
+                    Version.parse(productLineVersion),
+                    Platform.Default)
         }
     }
 
     open class VisualStudioState {
         var installationPath: String? = null
         var installationVersion: String? = null
+        var launchParams: LaunchParams? = null
         var catalogInfo: CatalogInfo? = null
         var product: ProductInfo? = null
     }
@@ -47,8 +56,13 @@ class JsonVisualStudioInstanceParser(private val _jsonParser: JsonParser) : Visu
         var id: String? = null
     }
 
+    class LaunchParams {
+        var fileName: String? = null
+    }
+
     companion object {
         private val LOG = Logger.getLogger(JsonVisualStudioInstanceParser::class.java)
         internal const val TeamExplorerProductId = "Microsoft.VisualStudio.Product.TeamExplorer"
+        private val DefaultDevenvPath = File(File(File("Common7"), "IDE"), "devenv.exe")
     }
 }

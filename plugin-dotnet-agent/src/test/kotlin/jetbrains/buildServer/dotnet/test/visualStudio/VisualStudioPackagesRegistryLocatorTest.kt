@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package jetbrains.buildServer.dotnet.test.dotnet
+package jetbrains.buildServer.dotnet.test.visualStudio
 
 import io.mockk.MockKAnnotations
 import io.mockk.clearAllMocks
@@ -22,10 +22,10 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import jetbrains.buildServer.agent.*
 import jetbrains.buildServer.dotnet.*
+import jetbrains.buildServer.visualStudio.VisualStudioPackagesRegistryLocator
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.Test
-import java.io.File
 
 class VisualStudioPackagesRegistryLocatorTest {
     @MockK private lateinit var _windowsRegistry: WindowsRegistry
@@ -60,7 +60,7 @@ class VisualStudioPackagesRegistryLocatorTest {
                 WindowsRegistryValue(rootKey + "CachePath", WindowsRegistryValueType.Long, "0x10")
         )
 
-        every { _windowsRegistry.get(any<WindowsRegistryKey>(), any<WindowsRegistryVisitor>()) } answers  {
+        every { _windowsRegistry.get(any<WindowsRegistryKey>(), any<WindowsRegistryVisitor>(), false) } answers  {
             val visitor = arg<WindowsRegistryVisitor>(1)
             for (item in regItems) {
                 when (item) {

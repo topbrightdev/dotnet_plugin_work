@@ -1,6 +1,7 @@
 package jetbrains.buildServer.dotnet
 
 import jetbrains.buildServer.agent.*
+import jetbrains.buildServer.agent.ToolInstanceType
 import org.apache.log4j.Logger
 import java.io.File
 
@@ -15,26 +16,30 @@ class MSBuildRegistryAgentPropertiesProvider(
         val props = mutableListOf<AgentProperty>()
 
         for (key in RegKeys) {
-            _windowsRegistry.get(key, object: WindowsRegistryVisitor {
-                override fun accept(key: WindowsRegistryKey) = true
-                override fun accept(value: WindowsRegistryValue): Boolean {
-                    if (
-                            value.type == WindowsRegistryValueType.Str
-                            && value.text.isNotBlank()
-                            && "MSBuildToolsPath".equals(value.key.parts.lastOrNull(), true)) {
-                        val versionStr = value.key.parts.dropLast(1).lastOrNull()
-                        versionStr?.let { version ->
-                            if (_msuildValidator.isValide(File(value.text))) {
-                                props.add(AgentProperty("MSBuildTools${version}_${value.key.bitness.platform.id}_Path", value.text))
-                            } else {
-                                LOG.warn("Cannot find MSBuild in \"${value.text}\".")
+            _windowsRegistry.get(
+                    key,
+                    object: WindowsRegistryVisitor {
+                        override fun accept(key: WindowsRegistryKey) = true
+                        override fun accept(value: WindowsRegistryValue): Boolean {
+                            if (
+                                    value.type == WindowsRegistryValueType.Str
+                                    && value.text.isNotBlank()
+                                    && "MSBuildToolsPath".equals(value.key.parts.lastOrNull(), true)) {
+                                val versionStr = value.key.parts.dropLast(1).lastOrNull()
+                                versionStr?.let { version ->
+                                    val path = File(value.text)
+                                    if (_msuildValidator.isValid(path)) {
+                                        props.add(AgentProperty(ToolInstanceType.MSBuildTool, "MSBuildTools${version}_${value.key.bitness.platform.id}_Path", path.path))
+                                    } else {
+                                        LOG.warn("Cannot find MSBuild in \"${value.text}\".")
+                                    }
+                                }
                             }
-                        }
-                    }
 
-                    return true
-                }
-            })
+                            return true
+                        }
+                    },
+            true)
         }
 
         return props.asSequence()
@@ -43,21 +48,14 @@ class MSBuildRegistryAgentPropertiesProvider(
     companion object {
         private val LOG = Logger.getLogger(MSBuildRegistryAgentPropertiesProvider::class.java)
 
-        private val RegKeys = sequenceOf<WindowsRegistryKey>(
-                WindowsRegistryKey.create(
-                        WindowsRegistryBitness.Bitness64,
-                        WindowsRegistryHive.LOCAL_MACHINE,
-                        "SOFTWARE",
-                        "Microsoft",
-                        "MSBuild",
-                        "ToolsVersions"),
-                WindowsRegistryKey.create(
-                        WindowsRegistryBitness.Bitness32,
-                        WindowsRegistryHive.LOCAL_MACHINE,
-                        "SOFTWARE",
-                        "Microsoft",
-                        "MSBuild",
-                        "ToolsVersions")
-        )
+        private val RegKeys = WindowsRegistryBitness.values().map {
+            WindowsRegistryKey.create(
+                    it,
+                    WindowsRegistryHive.LOCAL_MACHINE,
+                    "SOFTWARE",
+                    "Microsoft",
+                    "MSBuild",
+                    "ToolsVersions")
+        }
     }
 }

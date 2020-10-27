@@ -1,6 +1,5 @@
 package jetbrains.buildServer.agent
 
-import jetbrains.buildServer.dotnet.DotnetAgentPropertiesProvider
 import jetbrains.buildServer.rx.Disposable
 import jetbrains.buildServer.rx.subscribe
 import org.apache.log4j.Logger
@@ -15,14 +14,20 @@ class PropertiesExtension(
                     LOG.info("Fetching the agent properties for ${agentPropertiesProvider.desription}")
                     try {
                         for (property in agentPropertiesProvider.properties) {
-                            val prevValue = configuration.configurationParameters.get(property.name)
-                            if (prevValue != null) {
-                                LOG.warn("Update ${property.name}=\"${property.value}\". Previous value was \"$prevValue\".")
-                            } else {
-                                LOG.info("Add ${property.name}=\"${property.value}\".")
+                            var name = property.name
+
+                            if (property.toolType != ToolInstanceType.DotNetCLI && property.toolType != ToolInstanceType.DotNetSDK) {
+                                name = name + "_Test_" + property.toolType.name + "_from_" + agentPropertiesProvider.desription.replace(' ', '_')
                             }
 
-                            configuration.addConfigurationParameter(property.name, property.value)
+                            val prevValue = configuration.configurationParameters.get(name)
+                            if (prevValue != null) {
+                                LOG.warn("Update ${name}=\"${property.value}\". Previous value was \"$prevValue\".")
+                            } else {
+                                LOG.info("Add ${name}=\"${property.value}\".")
+                            }
+
+                            configuration.addConfigurationParameter(name, property.value)
                         }
                     }
                     catch (e: Exception) {

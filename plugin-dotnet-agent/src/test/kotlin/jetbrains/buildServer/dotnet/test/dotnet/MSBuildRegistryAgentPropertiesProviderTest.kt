@@ -21,13 +21,10 @@ import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import jetbrains.buildServer.agent.*
-import jetbrains.buildServer.agent.runner.PathType
-import jetbrains.buildServer.agent.runner.PathsService
+import jetbrains.buildServer.agent.ToolInstanceType
 import jetbrains.buildServer.dotnet.*
-import jetbrains.buildServer.rx.subjectOf
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
-import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
 import java.io.File
 
@@ -72,10 +69,10 @@ class MSBuildRegistryAgentPropertiesProviderTest {
                 WindowsRegistryValue(rootKey + "15.0" + "MSBuildToolsPath", WindowsRegistryValueType.Text, "msbuild15"),
                 rootKey + "16.0",
                 WindowsRegistryValue(rootKey + "16.0" + "MSBuildToolsPathAaa", WindowsRegistryValueType.Str, "msbuild16"),
-                WindowsRegistryValue(rootKey32 + "17.0" + "MSBuildToolsPath", WindowsRegistryValueType.Str, "msbuild17")
+                WindowsRegistryValue(rootKey32 + "17.0" + "MSBuildToolsPath", WindowsRegistryValueType.Str, "msbuild17" + File.separator)
         )
 
-        every { _windowsRegistry.get(any<WindowsRegistryKey>(), any<WindowsRegistryVisitor>()) } answers  {
+        every { _windowsRegistry.get(any<WindowsRegistryKey>(), any<WindowsRegistryVisitor>(), true) } answers  {
             val visitor = arg<WindowsRegistryVisitor>(1)
             for (item in regItems) {
                 when (item) {
@@ -87,9 +84,9 @@ class MSBuildRegistryAgentPropertiesProviderTest {
             value
         }
 
-        every { _msuildValidator.isValide(File("msbuild12")) } returns true
-        every { _msuildValidator.isValide(File("msbuild13")) } returns false
-        every { _msuildValidator.isValide(File("msbuild17")) } returns true
+        every { _msuildValidator.isValid(File("msbuild12")) } returns true
+        every { _msuildValidator.isValid(File("msbuild13")) } returns false
+        every { _msuildValidator.isValid(File("msbuild17" + File.separator)) } returns true
 
         val propertiesProvider = createInstance()
 
@@ -98,11 +95,12 @@ class MSBuildRegistryAgentPropertiesProviderTest {
         Assert.assertEquals(
                 propertiesProvider.properties.toList(),
                 listOf(
-                        AgentProperty("MSBuildTools12.0_x64_Path", "msbuild12"),
-                        AgentProperty("MSBuildTools17.0_x86_Path", "msbuild17")))
+                        AgentProperty(ToolInstanceType.MSBuildTool, "MSBuildTools12.0_x64_Path", "msbuild12"),
+                        AgentProperty(ToolInstanceType.MSBuildTool, "MSBuildTools17.0_x86_Path", "msbuild17")))
     }
 
-    private fun createInstance() = MSBuildRegistryAgentPropertiesProvider(
-                _windowsRegistry,
-                _msuildValidator)
+    private fun createInstance() =
+            MSBuildRegistryAgentPropertiesProvider(
+                    _windowsRegistry,
+                    _msuildValidator)
 }
