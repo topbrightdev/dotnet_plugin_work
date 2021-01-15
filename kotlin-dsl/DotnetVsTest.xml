@@ -89,9 +89,6 @@
                 @see Platform
             </description>
         </param>
-        <param name="required.sdk" dslName="sdk">
-            <description>.NET SDK versions separated by semicolon to be required on agents.</description>
-        </param>
     </params>
     <types>
         <enum name="Verbosity">

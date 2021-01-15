@@ -18,15 +18,12 @@ package jetbrains.buildServer.dotnet.commands
 
 import jetbrains.buildServer.dotnet.DotnetCommandType
 import jetbrains.buildServer.dotnet.DotnetConstants
-import jetbrains.buildServer.dotnet.RequirementFactory
 import jetbrains.buildServer.serverSide.InvalidProperty
 
 /**
  * Provides parameters for dotnet nuget delete command.
  */
-class NugetDeleteCommandType(
-        private val _requirementFactory: RequirementFactory)
-    : DotnetType(_requirementFactory) {
+class NugetDeleteCommandType : DotnetType() {
     override val name: String = DotnetCommandType.NuGetDelete.id
 
     override val description: String = name.replace('-', ' ')

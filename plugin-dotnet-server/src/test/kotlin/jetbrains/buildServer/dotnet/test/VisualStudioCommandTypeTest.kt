@@ -16,9 +16,7 @@
 
 package jetbrains.buildServer.dotnet.test
 
-import io.mockk.mockk
 import jetbrains.buildServer.dotnet.DotnetConstants
-import jetbrains.buildServer.dotnet.RequirementFactory
 import jetbrains.buildServer.dotnet.Tool
 import jetbrains.buildServer.dotnet.commands.VisualStudioCommandType
 import jetbrains.buildServer.requirements.Requirement
@@ -47,7 +45,7 @@ class VisualStudioCommandTypeTest {
             parameters: Map<String, String>,
             expectedRequirements: Sequence<Requirement>) {
         // Given
-        val instance = VisualStudioCommandType(mockk<RequirementFactory>())
+        val instance = VisualStudioCommandType()
         val ctx = Mockery()
 
         // When

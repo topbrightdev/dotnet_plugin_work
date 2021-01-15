@@ -26,9 +26,7 @@ import org.springframework.beans.factory.BeanFactory
 /**
  * Provides parameters for dotnet %custom% command.
  */
-class CustomCommandType(
-        private val _requirementFactory: RequirementFactory)
-    : DotnetType(_requirementFactory) {
+class CustomCommandType : DotnetType() {
     override val name: String = DotnetCommandType.Custom.id
 
     override val description: String = "<custom>"

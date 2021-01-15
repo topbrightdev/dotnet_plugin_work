@@ -43,9 +43,6 @@ class DotnetParametersProvider {
     val frameworkKey: String
         get() = DotnetConstants.PARAM_FRAMEWORK
 
-    val requiredSdkKey: String
-        get() = DotnetConstants.PARAM_REQUIRED_SDK
-
     val msbuildVersionKey: String
         get() = DotnetConstants.PARAM_MSBUILD_VERSION
 
@@ -160,29 +157,31 @@ class DotnetParametersProvider {
     companion object {
         private val experimentalMode get() = InternalProperties.getBoolean(DotnetConstants.PARAM_EXPERIMENTAL) ?: false
         private val supportMSBuildBitness get() = InternalProperties.getBoolean(DotnetConstants.PARAM_SUPPORT_MSBUILD_BITNESS) ?: false
-        private val experimentalCommandTypes: Sequence<CommandType> = sequenceOf()
-        private val _requirementFactory: RequirementFactory = RequirementFactoryImpl()
+
+        private val experimentalCommandTypes: Sequence<CommandType> =
+                    sequenceOf()
+
         val commandTypes
             get() = sequenceOf(
-                    RestoreCommandType(_requirementFactory),
-                    BuildCommandType(_requirementFactory),
-                    TestCommandType(_requirementFactory),
-                    PublishCommandType(_requirementFactory),
-                    PackCommandType(_requirementFactory),
-                    NugetPushCommandType(_requirementFactory),
-                    NugetDeleteCommandType(_requirementFactory),
-                    CleanCommandType(_requirementFactory),
-                    RunCommandType(_requirementFactory),
-                    MSBuildCommandType(_requirementFactory),
-                    VSTestCommandType(_requirementFactory),
-                    VisualStudioCommandType(_requirementFactory))
+                    RestoreCommandType(),
+                    BuildCommandType(),
+                    TestCommandType(),
+                    PublishCommandType(),
+                    PackCommandType(),
+                    NugetPushCommandType(),
+                    NugetDeleteCommandType(),
+                    CleanCommandType(),
+                    RunCommandType(),
+                    MSBuildCommandType(),
+                    VSTestCommandType(),
+                    VisualStudioCommandType())
                     .plus(if(experimentalMode) experimentalCommandTypes else emptySequence())
                     .sortedBy { it.description }
-                    .plus(CustomCommandType(_requirementFactory))
+                    .plus(CustomCommandType())
                     .associateBy { it.name }
 
         val coverageTypes
-            get() = sequenceOf<CommandType>(DotCoverCoverageType(_requirementFactory))
+            get() = sequenceOf<CommandType>(DotCoverCoverageType())
                     .sortedBy { it.name }
                     .associateBy { it.name }
     }

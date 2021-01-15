@@ -5,7 +5,6 @@ import jetbrains.buildServer.agent.AgentProperty
 import jetbrains.buildServer.agent.ToolInstanceType
 import jetbrains.buildServer.agent.Version
 import jetbrains.buildServer.agent.runner.ToolInstanceProvider
-import jetbrains.buildServer.dotnet.DotnetConstants.CONFIG_PREFIX_DOTNET_MSTEST
 
 class MSTestAgentPropertiesProvider(
         private val _visualStudioTestInstanceProvider: ToolInstanceProvider)
@@ -18,6 +17,6 @@ class MSTestAgentPropertiesProvider(
                 .filter { it.toolType == ToolInstanceType.MSTest }
                 .map {
                     console ->
-                    AgentProperty(ToolInstanceType.MSTest, "$CONFIG_PREFIX_DOTNET_MSTEST.${console.baseVersion.major}${Version.Separator}${console.baseVersion.minor}", console.installationPath.path)
+                    AgentProperty(ToolInstanceType.MSTest, "teamcity.dotnet.mstest.${console.baseVersion.major}${Version.Separator}${console.baseVersion.minor}", console.installationPath.path)
                 }
 }
