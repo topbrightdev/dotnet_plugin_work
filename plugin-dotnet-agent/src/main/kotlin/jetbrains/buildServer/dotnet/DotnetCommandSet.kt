@@ -30,27 +30,14 @@ class DotnetCommandSet(
     : CommandSet {
 
     private val _knownCommands: Map<String, DotnetCommand> = commands.associateBy({ it.commandType.id }, { it })
-    private val _knownTestAssemblyCommand: DotnetCommand = _knownCommands[DotnetCommandType.TestAssembly.id]!!
 
     override val commands: Sequence<DotnetCommand>
         get() = _parametersService.tryGetParameter(ParameterType.Runner, DotnetConstants.PARAM_COMMAND)?.let {
-            _knownCommands[it]?.let { command ->
-                getTargetArguments(command).asSequence().map {
-                    val targetArguments = TargetArguments(it.arguments.toList().asSequence())
-
-                    if (    command.commandType == DotnetCommandType.Test
-                            && targetArguments.arguments.filter { it.argumentType == CommandLineArgumentType.Target && "dll".equals(File(it.value).extension, true) }.any()) {
-                        CompositeCommand(command.commandType.id, _knownTestAssemblyCommand, targetArguments)
-                    }
-                    else {
-                        CompositeCommand(command.commandType.id, command, targetArguments)
-                    }
-                }
-            }
+            _knownCommands[it]?.let { getCommands(it) }
         } ?: emptySequence()
 
-    private fun getTargetArguments(command: DotnetCommand): Sequence<TargetArguments> =
-            command.targetArguments.ifEmpty { sequenceOf(TargetArguments(emptySequence())) }
+    private fun getCommands(command: DotnetCommand): Sequence<CompositeCommand> =
+            command.targetArguments.ifEmpty { sequenceOf(TargetArguments(emptySequence())) }.map { CompositeCommand(command.commandType.id, command, it) }
 
     class CompositeCommand(
             private val commandId: String,
@@ -69,8 +56,11 @@ class DotnetCommandSet(
 
                     // projects
                     yieldAll(_targetArguments.arguments)
+
+                    var newContext = DotnetBuildContext(context.workingDirectory, this@CompositeCommand, context.toolVersion, context.verbosityLevel)
+
                     // command specific arguments
-                    yieldAll(_command.getArguments(context))
+                    yieldAll(_command.getArguments(newContext))
                 }
 
         override val targetArguments: Sequence<TargetArguments>
