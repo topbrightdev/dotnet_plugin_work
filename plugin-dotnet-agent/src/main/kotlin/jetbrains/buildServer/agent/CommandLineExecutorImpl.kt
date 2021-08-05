@@ -52,13 +52,7 @@ class CommandLineExecutorImpl : CommandLineExecutor {
                 resultStr.append("<--- Stderr:\n${it.stderr}")
                 LOG.debug("<--- Result:\n$resultStr")
             } else {
-                val message = "<--- \"${cmd.commandLineString}\" exits with code: ${it.exitCode}"
-                if(commandLine.IsInternal) {
-                    LOG.debug(message)
-                }
-                else {
-                    LOG.info(message)
-                }
+                LOG.info("<--- \"${cmd.commandLineString}\" exits with code: ${it.exitCode}")
             }
 
             return result

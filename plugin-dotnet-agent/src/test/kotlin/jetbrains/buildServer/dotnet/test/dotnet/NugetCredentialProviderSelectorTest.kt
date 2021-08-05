@@ -9,18 +9,14 @@ import jetbrains.buildServer.agent.runner.ParameterType
 import jetbrains.buildServer.agent.runner.ParametersService
 import jetbrains.buildServer.dotnet.NugetCredentialProviderSelectorImpl
 import jetbrains.buildServer.agent.Version
-import jetbrains.buildServer.dotnet.DotnetRuntime
-import jetbrains.buildServer.dotnet.DotnetRuntimesProvider
 import org.testng.Assert
 import org.testng.annotations.BeforeMethod
 import org.testng.annotations.DataProvider
 import org.testng.annotations.Test
-import java.io.File
 
 class NugetCredentialProviderSelectorTest {
     @MockK private lateinit var _parametersService: ParametersService
     @MockK private lateinit var _virtualContext: VirtualContext
-    @MockK private lateinit var _runtimesProvider: DotnetRuntimesProvider
 
     @BeforeMethod
     fun setUp() {
@@ -35,7 +31,6 @@ class NugetCredentialProviderSelectorTest {
                 // Disabled
                 arrayOf(
                         Version(3, 1, 100),
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to "true"
                         ),
@@ -46,7 +41,6 @@ class NugetCredentialProviderSelectorTest {
                 // Full .NET
                 arrayOf(
                         Version.Empty,
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider4.0.0_Path" to "CredentialProvide.exe"
@@ -58,7 +52,6 @@ class NugetCredentialProviderSelectorTest {
                 // Simple case
                 arrayOf(
                         Version.CredentialProviderVersion,
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider2.0.0_Path" to "CredentialProvide.dll"
@@ -70,11 +63,14 @@ class NugetCredentialProviderSelectorTest {
                 // Has no any DotNetCredentialProvider
                 arrayOf(
                         Version(3, 1, 200),
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider2.0.0_Path" to null,
-                                "DotNetCredentialProvider3.0.0_Path" to null
+                                "DotNetCredentialProvider3.0.0_Path" to null,
+                                "DotNetCoreSDK3.1.102_Path" to "abc",
+                                "DotNetCoreSDK2.0.100_Path" to "abc",
+                                "DotNetCoreSDK2.1.301_Path" to "abc",
+                                "DotNetCoreSDK3.1.200_Path" to "abc"
                         ),
                         true,
                         null
@@ -83,7 +79,6 @@ class NugetCredentialProviderSelectorTest {
                 // .NET 5
                 arrayOf(
                         Version(5, 1, 100),
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to "FalsE",
                                 "DotNetCredentialProvider5.0.0_Path" to "CredentialProvide.dll"
@@ -95,7 +90,6 @@ class NugetCredentialProviderSelectorTest {
                 // Version too low
                 arrayOf(
                         Version(2, 1, 399),
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider3.0.0_Path" to "CredentialProvide.dll"
@@ -104,33 +98,21 @@ class NugetCredentialProviderSelectorTest {
                         null
                 ),
 
-                // Should select the credential provider related to the available CredentialProvider and .NET runtime version
+                // Should select the credential provider related to the minimal SDK version
                 arrayOf(
                         Version(5, 1, 100, "preview"),
-                        sequenceOf(Version(3, 1, 200)),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider1.0.0_Path" to "CredentialProvide1.dll",
                                 "DotNetCredentialProvider2.0.0_Path" to "CredentialProvide2.dll",
                                 "DotNetCredentialProvider3.0.0_Path" to "CredentialProvide3.dll",
                                 "DotNetCredentialProvider4.0.0_Path" to "CredentialProvide.exe",
-                                "DotNetCredentialProvider5.0.0_Path" to null
-                        ),
-                        false,
-                        "v_CredentialProvide3.dll"
-                ),
-
-                // Should select the credential provider related to an the newest available CredentialProvider and .NET runtime version
-                arrayOf(
-                        Version(5, 1, 100, "preview"),
-                        sequenceOf(Version(1, 2, 200), Version(2, 1, 300)),
-                        mapOf(
-                                "teamcity.nuget.credentialprovider.disabled" to null,
-                                "DotNetCredentialProvider1.0.0_Path" to "CredentialProvide1.dll",
-                                "DotNetCredentialProvider2.0.0_Path" to "CredentialProvide2.dll",
-                                "DotNetCredentialProvider3.0.0_Path" to "CredentialProvide3.dll",
-                                "DotNetCredentialProvider4.0.0_Path" to "CredentialProvide.exe",
-                                "DotNetCredentialProvider5.0.0_Path" to null
+                                "DotNetCredentialProvider5.0.0_Path" to null,
+                                "DotNetCoreSDK5.0.100-preview.1.20155.7_Path" to "abc",
+                                "DotNetCoreSDK3.1.102_Path" to "abc",
+                                "DotNetCoreSDK2.0.100_Path" to "abc",
+                                "DotNetCoreSDK2.1.301_Path" to "abc",
+                                "DotNetCoreSDK3.1.200_Path" to "abc"
                         ),
                         false,
                         "v_CredentialProvide2.dll"
@@ -139,14 +121,18 @@ class NugetCredentialProviderSelectorTest {
                 // Should not select the credential provider when in virtual context
                 arrayOf(
                         Version(5, 1, 100, "preview"),
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider1.0.0_Path" to "CredentialProvide1.dll",
                                 "DotNetCredentialProvider2.0.0_Path" to "CredentialProvide2.dll",
                                 "DotNetCredentialProvider3.0.0_Path" to "CredentialProvide3.dll",
                                 "DotNetCredentialProvider4.0.0_Path" to "CredentialProvide.exe",
-                                "DotNetCredentialProvider5.0.0_Path" to null
+                                "DotNetCredentialProvider5.0.0_Path" to null,
+                                "DotNetCoreSDK5.0.100-preview.1.20155.7_Path" to "abc",
+                                "DotNetCoreSDK3.1.102_Path" to "abc",
+                                "DotNetCoreSDK2.0.100_Path" to "abc",
+                                "DotNetCoreSDK2.1.301_Path" to "abc",
+                                "DotNetCoreSDK3.1.200_Path" to "abc"
                         ),
                         true,
                         null
@@ -155,14 +141,18 @@ class NugetCredentialProviderSelectorTest {
                 // Should not select the credential provider when Full .NET
                 arrayOf(
                         Version.Empty,
-                        emptySequence<Version>(),
                         mapOf(
                                 "teamcity.nuget.credentialprovider.disabled" to null,
                                 "DotNetCredentialProvider1.0.0_Path" to "CredentialProvide1.dll",
                                 "DotNetCredentialProvider2.0.0_Path" to "CredentialProvide2.dll",
                                 "DotNetCredentialProvider3.0.0_Path" to "CredentialProvide3.dll",
                                 "DotNetCredentialProvider4.0.0_Path" to null,
-                                "DotNetCredentialProvider5.0.0_Path" to null
+                                "DotNetCredentialProvider5.0.0_Path" to null,
+                                "DotNetCoreSDK5.0.100-preview.1.20155.7_Path" to "abc",
+                                "DotNetCoreSDK3.1.102_Path" to "abc",
+                                "DotNetCoreSDK2.0.100_Path" to "abc",
+                                "DotNetCoreSDK2.1.301_Path" to "abc",
+                                "DotNetCoreSDK3.1.200_Path" to "abc"
                         ),
                         true,
                         null
@@ -171,12 +161,7 @@ class NugetCredentialProviderSelectorTest {
     }
 
     @Test(dataProvider = "cases")
-    fun shouldSelectCredentialProvider(
-            sdkVersion: Version,
-            runtimes: Sequence<Version>,
-            params: Map<String, String?>,
-            isVirtual: Boolean,
-            expectedCredentialProvider: String?) {
+    fun shouldSelectCredentialProvider(sdkVersion: Version, params: Map<String, String?>, isVirtual: Boolean, expectedCredentialProvider: String?) {
         // Given
         val selector = createInstance()
 
@@ -186,15 +171,13 @@ class NugetCredentialProviderSelectorTest {
         }
 
         every { _parametersService.getParameterNames(ParameterType.Configuration) } returns params.keys.asSequence()
-        every { _runtimesProvider.getRuntimes() } returns runtimes.map { DotnetRuntime(File("."), it, "") }
         every { _virtualContext.isVirtual } returns isVirtual
 
         val actualCredentialProvider = selector.trySelect(sdkVersion)
 
         // Then
-        Assert.assertEquals(actualCredentialProvider, expectedCredentialProvider)
+        Assert.assertEquals(expectedCredentialProvider, actualCredentialProvider)
     }
 
-    private fun createInstance() =
-            NugetCredentialProviderSelectorImpl(_parametersService, _runtimesProvider, _virtualContext)
+    private fun createInstance() = NugetCredentialProviderSelectorImpl(_parametersService, _virtualContext)
 }

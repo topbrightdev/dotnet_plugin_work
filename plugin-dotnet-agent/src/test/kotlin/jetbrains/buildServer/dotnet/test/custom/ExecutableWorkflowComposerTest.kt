@@ -43,6 +43,7 @@ class ExecutableWorkflowComposerTest {
 
     private val _workingDirectory = File("wd")
     private val _args = listOf(CommandLineArgument("arg1", CommandLineArgumentType.Custom), CommandLineArgument("arg2", CommandLineArgumentType.Custom))
+    private val _dotnetEnvVars = listOf(CommandLineEnvironmentVariable("env222", "val222"))
 
     @BeforeMethod
     fun setUp() {
@@ -63,7 +64,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc.exe"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -87,7 +89,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc.com"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -104,7 +107,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc.Cmd"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -121,7 +125,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc.Cmd"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -138,7 +143,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc.baT"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -155,7 +161,8 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("abc"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                emptyList<CommandLineEnvironmentVariable>()
                                         )
                                 )
                         ),
@@ -172,7 +179,10 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("vdotnet"),
                                                 Path(_workingDirectory.path),
-                                                listOf(CommandLineArgument("abc.Dll", CommandLineArgumentType.Target)) + _args
+                                                listOf(CommandLineArgument("abc.Dll", CommandLineArgumentType.Target)) + _args,
+                                                _dotnetEnvVars,
+                                                "",
+                                                listOf(StdOutText(".NET SDK ", Color.Header), StdOutText("${Version(1, 2, 3)} ", Color.Header))
                                         )
                                 )
                         ),
@@ -189,7 +199,10 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("vdotnet"),
                                                 Path(_workingDirectory.path),
-                                                listOf(CommandLineArgument("abc.Dll", CommandLineArgumentType.Target)) + _args
+                                                listOf(CommandLineArgument("abc.Dll", CommandLineArgumentType.Target)) + _args,
+                                                _dotnetEnvVars,
+                                                "",
+                                                listOf(StdOutText(".NET SDK ", Color.Header), StdOutText("${Version(1, 2, 3)} ", Color.Header))
                                         )
                                 )
                         ),
@@ -206,7 +219,10 @@ class ExecutableWorkflowComposerTest {
                                                 TargetType.Tool,
                                                 Path("vdotnet"),
                                                 Path(_workingDirectory.path),
-                                                _args
+                                                _args,
+                                                _dotnetEnvVars,
+                                                "",
+                                                listOf(StdOutText(".NET SDK ", Color.Header), StdOutText("${Version(1, 2, 3)} ", Color.Header))
                                         )
                                 )
                         ),
@@ -243,8 +259,10 @@ class ExecutableWorkflowComposerTest {
         every { _dotnetStateWorkflowComposer.compose(_workflowContext, match { state -> defaultDotnetExecutableFile.equals(state.executable)}) } answers {
             val state = arg<ToolState>(1)
             state.virtualPathObserver.onNext(Path("vdotnet"))
+            state.versionObserver.onNext(Version(1, 2, 3))
             Workflow()
         }
+        every { _environmentVariables.getVariables(Version(1, 2, 3)) } returns _dotnetEnvVars.asSequence()
         val commandLines = targets
                 .map {
                     CommandLine(

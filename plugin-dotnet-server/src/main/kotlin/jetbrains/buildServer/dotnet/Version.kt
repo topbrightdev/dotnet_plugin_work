@@ -1,6 +1,6 @@
 package jetbrains.buildServer.dotnet
 
-import jetbrains.buildServer.Range
+import java.util.*
 
 infix fun Version.`in`(range: Range<Version>) = range.contains(this)
 

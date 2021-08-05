@@ -88,16 +88,4 @@
     <constructor-arg ref="dupFinderRunTypePropertiesProcessor"/>
   </bean>
 
-  <!--C# script-->
-  <bean class="jetbrains.buildServer.script.CSharpScriptRunTypePropertiesProcessor" id="cSharpScriptRunTypePropertiesProcessor"/>
-  <bean class="jetbrains.buildServer.script.CSharpScriptRunType">
-    <constructor-arg ref="cSharpScriptRunTypePropertiesProcessor"/>
-  </bean>
-  <bean class="jetbrains.buildServer.script.CSharpScriptTypeAdapter" id="cSharpScriptToolType"/>
-  <bean class="jetbrains.buildServer.script.CSharpScriptToolProvider">
-    <constructor-arg ref="cSharpScriptToolType"/>
-  </bean>
-
-  <bean class="jetbrains.buildServer.script.discovery.CSharpScriptDiscoveryExtension" id="cSharpScriptDiscoveryExtension"/>
-  <bean class="jetbrains.buildServer.script.discovery.ScriptDiscoverImpl" />
 </beans>
