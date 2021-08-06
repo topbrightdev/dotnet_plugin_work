@@ -1,9 +1,5 @@
 package jetbrains.buildServer.dotnet
 
-import jetbrains.buildServer.excluding
-import jetbrains.buildServer.including
-import jetbrains.buildServer.to
-
 class SdkTypeResolverImpl : SdkTypeResolver {
     override fun tryResolve(sdkVersion: Version): SdkType? =
             when {

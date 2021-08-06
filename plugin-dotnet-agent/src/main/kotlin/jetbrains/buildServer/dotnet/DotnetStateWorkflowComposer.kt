@@ -55,27 +55,26 @@ class DotnetStateWorkflowComposer(
                     }
                 }
 
-                if(state.versionObserver != null) {
-                    // Getting .NET SDK version
-                    val workingDirectory = Path(_pathsService.getPath(PathType.WorkingDirectory).canonicalPath)
-                    context
-                            .toOutput()
-                            .map { _versionParser.parse(listOf(it)) }
-                            .filter { it != Version.Empty }
-                            .subscribe(state.versionObserver)
-                            .use {
-                                yield(
-                                        CommandLine(
-                                                null,
-                                                TargetType.SystemDiagnostics,
-                                                virtualPath ?: executable.virtualPath,
-                                                workingDirectory,
-                                                DotnetWorkflowComposer.VersionArgs,
-                                                _defaultEnvironmentVariables.getVariables(Version.Empty).toList(),
-                                                "dotnet --version",
-                                                listOf(StdOutText("Getting the .NET SDK version"))))
-                            }
-                }
+                // Getting .NET Core version
+                val workingDirectory = Path(_pathsService.getPath(PathType.WorkingDirectory).canonicalPath)
+
+                context
+                        .toOutput()
+                        .map { _versionParser.parse(listOf(it)) }
+                        .filter { it != Version.Empty }
+                        .subscribe(state.versionObserver)
+                        .use {
+                            yield(
+                                    CommandLine(
+                                            null,
+                                        TargetType.SystemDiagnostics,
+                                        virtualPath ?: executable.virtualPath,
+                                        workingDirectory,
+                                        DotnetWorkflowComposer.VersionArgs,
+                                        _defaultEnvironmentVariables.getVariables(Version.Empty).toList(),
+                                    "dotnet --version",
+                                        listOf(StdOutText("Getting the .NET SDK version"))))
+                        }
             }
     )
 }
