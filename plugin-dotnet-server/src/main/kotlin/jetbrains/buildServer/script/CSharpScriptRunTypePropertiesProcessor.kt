@@ -11,6 +11,10 @@ class CSharpScriptRunTypePropertiesProcessor(
         validate(properties).toCollection(mutableListOf())
 
     private fun validate(properties: Map<String, String>) = sequence {
+        if (properties[ScriptConstants.CLT_PATH].isNullOrBlank()) {
+            yield(InvalidProperty(ScriptConstants.CLT_PATH, "The pat to ${ScriptConstants.RUNNER_DESCRIPTION} must be specified"))
+        }
+
         val scriptType = properties[ScriptConstants.SCRIPT_TYPE]?.let { ScriptType.tryParse(it) }
         if (scriptType == null) {
             yield(InvalidProperty(ScriptConstants.SCRIPT_TYPE, "Script type is not specified"))
