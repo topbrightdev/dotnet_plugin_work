@@ -19,7 +19,6 @@ package jetbrains.buildServer.dotnet
 import jetbrains.buildServer.agent.CommandLineArgument
 import jetbrains.buildServer.agent.CommandLineArgumentType
 import jetbrains.buildServer.agent.runner.ParametersService
-import jetbrains.buildServer.util.StringUtil
 
 class MSBuildCommand(
         _parametersService: ParametersService,
@@ -29,7 +28,9 @@ class MSBuildCommand(
         private val _customArgumentsProvider: ArgumentsProvider,
         override val toolResolver: ToolResolver,
         private val _vstestLoggerEnvironment: EnvironmentBuilder,
-        private val _targetsParser: TargetsParser)
+        private val _targetsParser: TargetsParser,
+        private val _testsFilterProvider: TestsFilterProvider,
+        private val _responseFileFactory: ResponseFileFactory)
     : DotnetCommandBase(_parametersService) {
 
     override val commandType: DotnetCommandType
@@ -42,33 +43,41 @@ class MSBuildCommand(
         parameters(DotnetConstants.PARAM_TARGETS)?.trim()?.let {
             val targets = _targetsParser.parse(it)
             if (targets.isNotBlank()) {
-                yield(CommandLineArgument("/t:$targets"))
+                yield(CommandLineArgument("-t:$targets"))
             }
         }
 
         parameters(DotnetConstants.PARAM_CONFIG)?.trim()?.let {
             if (it.isNotBlank()) {
-                yield(CommandLineArgument("/p:Configuration=$it"))
+                yield(CommandLineArgument("-p:Configuration=$it"))
             }
         }
 
         parameters(DotnetConstants.PARAM_PLATFORM)?.trim()?.let {
             if (it.isNotBlank()) {
-                yield(CommandLineArgument("/p:Platform=$it"))
+                yield(CommandLineArgument("-p:Platform=$it"))
             }
         }
 
         parameters(DotnetConstants.PARAM_RUNTIME)?.trim()?.let {
             if (it.isNotBlank()) {
-                yield(CommandLineArgument("/p:RuntimeIdentifiers=$it"))
+                yield(CommandLineArgument("-p:RuntimeIdentifiers=$it"))
             }
         }
 
         context.verbosityLevel?.let {
-            yield(CommandLineArgument("/v:${it.id.toLowerCase()}"))
+            yield(CommandLineArgument("-v:${it.id.toLowerCase()}"))
         }
 
         yieldAll(_msBuildResponseFileArgumentsProvider.getArguments(context))
+
+        _testsFilterProvider.filterExpression.let {
+            if (it.isNotBlank()) {
+                val filterRespponseFile = _responseFileFactory.createResponeFile("Filter", emptySequence(), sequenceOf(MSBuildParameter("VSTestTestCaseFilter", it)), context.verbosityLevel)
+                yield(CommandLineArgument("@${filterRespponseFile.path}"))
+            }
+        }
+
         yieldAll(_customArgumentsProvider.getArguments(context))
     }
 

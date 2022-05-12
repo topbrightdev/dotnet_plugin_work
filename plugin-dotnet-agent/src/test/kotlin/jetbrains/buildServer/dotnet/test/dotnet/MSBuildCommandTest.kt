@@ -34,6 +34,8 @@ import org.testng.annotations.Test
 class MSBuildCommandTest {
     @MockK private lateinit var _toolStateWorkflowComposer: ToolStateWorkflowComposer
     @MockK private lateinit var _targetsParser: TargetsParser
+    @MockK private lateinit var _testsFilterProvider: TestsFilterProvider
+    @MockK private lateinit var _responseFileFactory: ResponseFileFactory
 
     @BeforeMethod
     fun setUp() {
@@ -51,9 +53,9 @@ class MSBuildCommandTest {
                         Pair(DotnetConstants.PARAM_TARGETS, "restore build"),
                         Pair(DotnetConstants.PARAM_RUNTIME, "osx.10.11-x64"),
                         Pair(DotnetConstants.PARAM_CONFIG, "Release")),
-                        listOf("/t:restore;build", "/p:Configuration=Release", "/p:RuntimeIdentifiers=osx.10.11-x64", "respArgs", "customArg1")),
+                        listOf("-t:restore;build", "-p:Configuration=Release", "-p:RuntimeIdentifiers=osx.10.11-x64", "respArgs", "customArg1")),
                 arrayOf(mapOf(Pair(DotnetConstants.PARAM_TARGETS, "clean restore build pack")),
-                        listOf("/t:clean;restore;build;pack", "respArgs", "customArg1")))
+                        listOf("-t:clean;restore;build;pack", "respArgs", "customArg1")))
     }
 
     @Test(dataProvider = "argumentsData")
@@ -61,6 +63,7 @@ class MSBuildCommandTest {
             parameters: Map<String, String>,
             expectedArguments: List<String>) {
         // Given
+        every { _testsFilterProvider.filterExpression } returns ""
         val command = createCommand(parameters = parameters, targets = sequenceOf("my.csproj"), respArguments = sequenceOf(CommandLineArgument("respArgs")), customArguments = sequenceOf(CommandLineArgument("customArg1")))
 
         // When
@@ -129,6 +132,8 @@ class MSBuildCommandTest {
                 ArgumentsProviderStub(customArguments),
                 ToolResolverStub(ToolPlatform.Windows, ToolPath(Path("msbuild.exe")), true, _toolStateWorkflowComposer),
                 ctx.mock<EnvironmentBuilder>(EnvironmentBuilder::class.java),
-                _targetsParser)
+                _targetsParser,
+                _testsFilterProvider,
+                _responseFileFactory)
     }
 }
