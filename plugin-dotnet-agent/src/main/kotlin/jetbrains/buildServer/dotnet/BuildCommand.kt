@@ -21,16 +21,16 @@ import jetbrains.buildServer.agent.CommandLineArgumentType
 import jetbrains.buildServer.agent.runner.ParametersService
 
 class BuildCommand(
-    _parametersService: ParametersService,
-    override val resultsAnalyzer: ResultsAnalyzer,
-    private val _targetService: TargetService,
-    private val _commonArgumentsProvider: DotnetCommonArgumentsProvider,
-    override val toolResolver: DotnetToolResolver,
-    private val _vstestLoggerEnvironment: EnvironmentBuilder
-) : DotnetCommandBase(_parametersService) {
-    override val commandType = DotnetCommandType.Build
+        _parametersService: ParametersService,
+        override val resultsAnalyzer: ResultsAnalyzer,
+        private val _targetService: TargetService,
+        private val _commonArgumentsProvider: DotnetCommonArgumentsProvider,
+        override val toolResolver: DotnetToolResolver,
+        private val _vstestLoggerEnvironment: EnvironmentBuilder)
+    : DotnetCommandBase(_parametersService) {
 
-    override val commandWords = sequenceOf("build")
+    override val commandType: DotnetCommandType
+        get() = DotnetCommandType.Build
 
     override val targetArguments: Sequence<TargetArguments>
         get() = _targetService.targets.map { TargetArguments(sequenceOf(CommandLineArgument(it.target.path, CommandLineArgumentType.Target))) }

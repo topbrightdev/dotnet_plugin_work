@@ -24,7 +24,7 @@ class SdkRegistryProvider(
                             val parts = value.key.parts.takeLast(3)
                             val majorKey = parts[0]
                             val minorKey = parts[1]
-                            val name = parts[2].lowercase()
+                            val name = parts[2].toLowerCase()
                             var key: String? = null
                             var platform: Platform = Platform.Default
                             var toolInstanceType: ToolInstanceType = ToolInstanceType.WindowsSDK

@@ -31,24 +31,21 @@ class CmdWorkflowComposer(
     override fun compose(context: WorkflowContext, state:Unit, workflow: Workflow) =
             Workflow(sequence {
                 loop@ for (baseCommandLine in workflow.commandLines) {
-                    when (baseCommandLine.executableFile.extension().lowercase()) {
+                    when(baseCommandLine.executableFile.extension().toLowerCase()) {
                         "cmd", "bat" -> {
-                            if (_virtualContext.targetOSType != OSType.WINDOWS) {
+                            if(_virtualContext.targetOSType != OSType.WINDOWS) {
                                 _cannotExecute.writeBuildProblemFor(baseCommandLine.executableFile)
                                 break@loop
-                            } else yield(
-                                CommandLine(
+                            }
+                            else yield(CommandLine(
                                     baseCommandLine,
                                     TargetType.Host,
-                                    Path("cmd.exe"),
+                                    Path( "cmd.exe"),
                                     baseCommandLine.workingDirectory,
                                     getArguments(baseCommandLine).toList(),
                                     baseCommandLine.environmentVariables,
-                                    baseCommandLine.title
-                                )
-                            )
+                                    baseCommandLine.title))
                         }
-
                         else -> yield(baseCommandLine)
                     }
                 }

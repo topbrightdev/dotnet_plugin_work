@@ -41,7 +41,7 @@ class DotnetConfigurationsFetcher(private val _solutionDiscover: SolutionDiscove
                     .flatMap { it.configurations.asSequence() }
                     .map { it.name }
                     .plus(DefaultConfigurations)
-                    .distinctBy { it.lowercase() }
+                    .distinctBy { it.toLowerCase() }
                     .sorted()
 
     override fun getType(): String {

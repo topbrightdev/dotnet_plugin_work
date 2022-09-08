@@ -68,12 +68,12 @@ class DotnetTargetsFetcher(
                 .plus(discoveredTargets)
                 .plus(targets)
                 .plus(FinishDefaultTargets)
-                .distinctBy { it.lowercase() }
+                .distinctBy { it.toLowerCase() }
     }
 
     private fun exclude(src: List<String>, items: List<String>): List<String> {
-        val curItems = items.map { it.lowercase() }.toSet()
-        return src.filter { !curItems.contains(it.lowercase()) }
+        val curItems = items.map { it.toLowerCase() }.toSet()
+        return src.filter { !curItems.contains(it.toLowerCase()) }
     }
 
     override fun getType(): String {

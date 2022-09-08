@@ -21,20 +21,19 @@ import jetbrains.buildServer.rx.Disposable
 import jetbrains.buildServer.rx.Observer
 import jetbrains.buildServer.rx.emptyDisposable
 import jetbrains.buildServer.rx.emptyObserver
+import jetbrains.buildServer.agent.Logger
 import jetbrains.buildServer.dotnet.DotnetConstants
-import java.io.BufferedWriter
 import java.io.File
 
 class CommandExecutionAdapter(
-    private val _buildStepContext: BuildStepContext,
-    private val _loggerService: LoggerService,
-    private val _commandLinePresentationService: CommandLinePresentationService,
-    private val _virtualContext: VirtualContext,
-    private val _programCommandLineFactory: ProgramCommandLineFactory,
-    private val _messagesGuard: OutputReplacer,
-    private val _parametersService: ParametersService,
-    private val _pathsService: PathsService,
-) : CommandExecutionFactory, CommandExecution, BuildProgressLoggerAware {
+        private val _buildStepContext: BuildStepContext,
+        private val _loggerService: LoggerService,
+        private val _commandLinePresentationService: CommandLinePresentationService,
+        private val _virtualContext: VirtualContext,
+        private val _programCommandLineFactory: ProgramCommandLineFactory,
+        private val _messagesGuard: OutputReplacer,
+        private val _parametersService: ParametersService)
+    : CommandExecutionFactory, CommandExecution, BuildProgressLoggerAware {
     private var _eventObserver: Observer<CommandResultEvent> = emptyObserver<CommandResultEvent>()
     private var _commandLine: CommandLine = CommandLine(null, TargetType.NotApplicable, Path(""), Path(""))
     private var _blockToken: Disposable = emptyDisposable()
@@ -56,9 +55,10 @@ class CommandExecutionAdapter(
     override fun processStarted(programCommandLine: String, workingDirectory: File) {
         if (!_commandLine.title.isNullOrBlank())
         {
-            if (_loggingStrategy == LoggingStrategy.HiddenInBuildLog) {
+            if (_isHiddenInBuidLog) {
                 writeStandardOutput(_commandLine.title)
-            } else {
+            }
+            else {
                 _blockToken = _loggerService.writeBlock(_commandLine.title)
             }
         }
@@ -109,47 +109,48 @@ class CommandExecutionAdapter(
 
     override fun isCommandLineLoggingEnabled(): Boolean = false
 
-    override fun getLogger(): BuildProgressLogger =
-        SuppressingLogger(_loggerService, _buildStepContext.runnerContext.build.buildLogger, _loggingStrategy, _flowId)
+    override fun getLogger(): BuildProgressLogger = SuppressingLogger(_loggerService, _buildStepContext.runnerContext.build.buildLogger, _isHiddenInBuidLog, _flowId)
 
-    private val _loggingStrategy: LoggingStrategy get() =
-        when {
-            _commandLine.chain.any { it.target == TargetType.SystemDiagnostics } -> LoggingStrategy.HiddenInBuildLog
-            else -> LoggingStrategy.Default
-        }
+    private val _isHiddenInBuidLog get() = _commandLine.chain.any { it.target == TargetType.SystemDiagnostics }
 
     private fun writeStandardOutput(text: String) {
-        when (_loggingStrategy) {
-            LoggingStrategy.Default ->
-                _outputReplacer.replace(text).forEach {
-                    _loggerService.writeStandardOutput(it)
-                }
-
-            LoggingStrategy.HiddenInBuildLog ->
-                _loggerService.writeTrace(text)
+        if (_isHiddenInBuidLog)
+        {
+            _loggerService.writeTrace(text)
+        }
+        else {
+            for (newText in _outputReplacer.replace(text)) {
+                _loggerService.writeStandardOutput(newText)
+            }
         }
     }
 
     private fun writeStandardOutput(vararg text: StdOutText) {
-        when (_loggingStrategy) {
-            LoggingStrategy.Default ->
-                _loggerService.writeStandardOutput(*text)
-
-            LoggingStrategy.HiddenInBuildLog ->
-                _loggerService.writeTrace(text.map { it.text }.joinToString(" "))
+        if (_isHiddenInBuidLog) {
+            _loggerService.writeTrace(text.map { it.text }.joinToString(" "))
+        } else {
+            _loggerService.writeStandardOutput(*text)
         }
     }
 
+    companion object {
+        private val LOG = Logger.getLogger(CommandExecutionAdapter::class.java)
+    }
+
     private class SuppressingLogger(
-        private val _loggerService: LoggerService,
-        private val _baseLogger: BuildProgressLogger,
-        private val _loggingStrategy: LoggingStrategy,
-        private val _flowId: String
-    ): BuildProgressLogger by _baseLogger {
+            private val _loggerService: LoggerService,
+            private val _baseLogger: BuildProgressLogger,
+            private val _isHiddenInBuidLog: Boolean,
+            private val _flowId: String):
+            BuildProgressLogger by _baseLogger {
+
         override fun message(message: String?) {
-            when (_loggingStrategy) {
-                LoggingStrategy.Default -> _baseLogger.message(message)
-                LoggingStrategy.HiddenInBuildLog -> if (message != null) _loggerService.writeTrace(message)
+            if (!_isHiddenInBuidLog) {
+                _baseLogger.message(message)
+            } else {
+                if (message != null) {
+                    _loggerService.writeTrace(message)
+                }
             }
         }
 
@@ -157,15 +158,12 @@ class CommandExecutionAdapter(
     }
 
     private class TransparentOutputReplacer: OutputReplacer {
-        override fun replace(text: String) = sequenceOf(text)
+        override fun replace(text: String) = sequence {
+            yield(text)
+        }
 
         companion object {
             val Shared: OutputReplacer = TransparentOutputReplacer()
         }
-    }
-
-    private enum class LoggingStrategy {
-        Default,
-        HiddenInBuildLog
     }
 }

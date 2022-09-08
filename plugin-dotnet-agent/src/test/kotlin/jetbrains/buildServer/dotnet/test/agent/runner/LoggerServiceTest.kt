@@ -82,6 +82,7 @@ class LoggerServiceTest {
     @Test
     fun shouldWriteBuildProblem() {
         // Given
+        val actualBuildLog = mutableListOf<String>()
         var logger = createInstance()
         every { _buildInfo.id } returns "runnerId"
         every { _buildInfo.name } returns "MyStepName"

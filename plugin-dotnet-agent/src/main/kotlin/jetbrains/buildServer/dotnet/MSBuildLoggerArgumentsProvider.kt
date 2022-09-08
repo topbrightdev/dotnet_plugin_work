@@ -37,7 +37,7 @@ class MSBuildLoggerArgumentsProvider(
             yield("TeamCity")
 
             _loggerParameters.msBuildLoggerVerbosity?.let {
-                yield("verbosity=${it.id.lowercase()}")
+                yield("verbosity=${it.id.toLowerCase()}")
             }
 
             yieldAll(_loggerParameters.getAdditionalLoggerParameters(context))
