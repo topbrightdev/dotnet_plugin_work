@@ -16,24 +16,24 @@
 
 package jetbrains.buildServer.mono
 
-import jetbrains.buildServer.ExtensionHolder
 import jetbrains.buildServer.agent.*
-import jetbrains.buildServer.agent.config.AgentParametersSupplier
 import jetbrains.buildServer.dotnet.MonoConstants
-
+import jetbrains.buildServer.agent.Version
+import jetbrains.buildServer.util.EventDispatcher
+import jetbrains.buildServer.agent.Logger
 
 class MonoPropertiesExtension(
-        extensionHolder: ExtensionHolder,
+        events: EventDispatcher<AgentLifeCycleListener>,
         private val _toolProvider: ToolProvider,
         private val _commandLineExecutor: CommandLineExecutor,
         private val _versionParser: VersionParser)
-    : AgentParametersSupplier {
+    : AgentLifeCycleAdapter() {
 
     init {
-        extensionHolder.registerExtension(AgentParametersSupplier::class.java, javaClass.name, this)
+        events.addListener(this)
     }
 
-    override fun getParameters(): MutableMap<String, String> {
+    override fun beforeAgentConfigurationLoaded(agent: BuildAgent) {
         LOG.debug("Locating Mono")
         try {
             val command = CommandLine(
@@ -46,8 +46,8 @@ class MonoPropertiesExtension(
             _commandLineExecutor.tryExecute(command)?.let {
                 val version = _versionParser.parse(it.standardOutput)
                 if (version != Version.Empty) {
+                    agent.configuration.addConfigurationParameter(MonoConstants.CONFIG_PATH, command.executableFile.path)
                     LOG.info("Found Mono $it at ${command.executableFile.path}")
-                    return mutableMapOf(Pair(MonoConstants.CONFIG_PATH, command.executableFile.path))
                 }
                 else {
                     LOG.info("Mono not found")
@@ -57,8 +57,6 @@ class MonoPropertiesExtension(
             LOG.info("Mono not found")
             LOG.debug(e)
         }
-
-        return mutableMapOf()
     }
 
     companion object {
