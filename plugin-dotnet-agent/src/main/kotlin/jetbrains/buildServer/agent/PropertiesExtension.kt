@@ -1,6 +1,5 @@
 package jetbrains.buildServer.agent
 
-import jetbrains.buildServer.ExtensionHolder
 import jetbrains.buildServer.agent.config.AgentParametersSupplier
 import jetbrains.buildServer.rx.use
 import kotlinx.coroutines.CoroutineDispatcher
@@ -10,14 +9,14 @@ import kotlinx.coroutines.runBlocking
 
 class PropertiesExtension(
     private val _dispatcher: CoroutineDispatcher,
-    private val _agentPropertiesProviders: List<AgentPropertiesProvider>,
-    extensionHolder: ExtensionHolder
+    private val _agentPropertiesProviders: List<AgentPropertiesProvider>
 ) : AgentParametersSupplier {
     private val _lockObject = Object()
-    private val dotNetParameters by lazy {
+
+    override fun getParameters(): MutableMap<String, String> {
         val parameters = mutableMapOf<String, String>()
         LOG.infoBlock("Fetched agent properties").use {
-            runBlocking {
+            return runBlocking {
                 _agentPropertiesProviders.map { agentPropertiesProvider ->
                     launch(_dispatcher){
                         fetchProperties(agentPropertiesProvider, parameters)
@@ -27,12 +26,6 @@ class PropertiesExtension(
             }
         }
     }
-
-    init {
-        extensionHolder.registerExtension(AgentParametersSupplier::class.java, PROPERTIES_EXTENSION_NAME, this)
-    }
-
-    override fun getParameters(): MutableMap<String, String> = dotNetParameters
 
     private fun fetchProperties(agentPropertiesProvider: AgentPropertiesProvider, parameters: MutableMap<String, String>) {
         LOG.debugBlock("Fetching agent properties for ${agentPropertiesProvider.desription}").use {
@@ -58,6 +51,5 @@ class PropertiesExtension(
 
     companion object {
         private val LOG = Logger.getLogger(PropertiesExtension::class.java)
-        const val PROPERTIES_EXTENSION_NAME = "DotNetPropertiesExtensionSupplier"
     }
 }
