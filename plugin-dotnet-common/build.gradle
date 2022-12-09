@@ -15,7 +15,7 @@
  */
 
 plugins{
-    id 'io.github.rodm.teamcity-common' version '1.5'
+    id 'com.github.rodm.teamcity-common' version '1.4.1'
     id 'plugin.conventions'
 }
 
@@ -27,10 +27,6 @@ dependencies {
 }
 
 teamcity {
-    version = teamcityVersion
+    version = project.teamcityVersion
     allowSnapshotVersions = true
-}
-
-repositories {
-    mavenCentral()
 }

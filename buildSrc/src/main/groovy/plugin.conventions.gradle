@@ -7,8 +7,8 @@ repositories {
     mavenLocal()
 }
 
-group = projectIds.group
-version = projectIds.version
+group = project.projectIds.group
+version = project.projectIds.version
 
 test.useTestNG()
 jar.version = null
